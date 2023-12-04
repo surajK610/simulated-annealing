@@ -12,10 +12,10 @@ add_subdirectory(src/graph)
 add_subdirectory(src/qubo)
 
 # Add the main executable
-add_executable(myapp src/main.cpp)
+add_executable(mcto src/main.cpp)
 
 # Link the graph and qubo libraries with the main executable
-target_link_libraries(myapp graph qubo)
+target_link_libraries(mcto graph qubo)
 
 # Enable testing and add the tests subdirectory
 enable_testing()
