@@ -1,4 +1,10 @@
-const int N = 3; // Size of the QUBO matrix
+//quboSolver.cpp
+
+#include "quboSolver.h"
+#include <iostream>
+#include <random>
+#include <limits>
+#include <omp.h>
 
 // Function to calculate the objective function value for a given configuration
 double calculateObjective(double Q[N][N], int configuration[N]) {
