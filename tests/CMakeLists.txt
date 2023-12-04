@@ -1,3 +1,4 @@
 add_executable(test_traffic_optimizer test_main.cpp)
 target_link_libraries(test_traffic_optimizer trafficGraph quboSolver)
 add_test(NAME test_traffic_optimizer COMMAND test_traffic_optimizer)
+
