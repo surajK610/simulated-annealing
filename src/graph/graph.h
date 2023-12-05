@@ -30,13 +30,10 @@ struct Car {
 };
 
 class TrafficGraph {
-    static const short unsigned int MAX_POSSIBLE_ROUTES= 300;
-    static const short unsigned int MAX_POSSIBLE_ROUTES= 300;
-
+    
     std::vector<Point> points;
     std::vector<Edge> edges;
 
-    void mapEndpoints(Car& car);
-    Route* findAllPaths(Point* source, Point* destination);
-    Route* findAlternativePaths(const std::vector<Route>& allPaths);
+    std::vector<Route> findAllPaths(Point* source, Point* destination);
+    std::vector<Route> findAlternativePaths(const std::vector<Route>& allPaths);
 };
