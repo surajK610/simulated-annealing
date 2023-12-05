@@ -1,11 +1,14 @@
-#include "trafficGraph.h"
+#include "graph.h"
 #include <random>
 #include <limits>
 #include <cmath>
 #include <algorithm>
-#include <unordered_set>
 #include <iostream>
 #include <random>
+#include <unordered_set>
+#include <unordered_map>
+#include <vector>
+#include <queue>
 
 double TrafficGraph::calculateDistance(const Point& a, const Point& b) {
     return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
@@ -129,7 +132,7 @@ void TrafficGraph::addEdge(Point* start, Point* end) {
     edges.push_back(Edge{start, end, distance});
 }
 
-void TrafficGraph::findAllPathsUtil(Point* current, Point* destination, std::vector<Edge>& path, std::vector<Route>& allPaths, std::unordered_set<Point*>& visited) {
+void  TrafficGraph::findAllPathsUtil(Point* current, Point* destination, std::vector<Edge>& path, std::vector<Route>& allPaths, std::unordered_set<Point*>& visited) {
     if (current == destination) {
         Route route;
         route.pathLen = path.size();
@@ -143,13 +146,11 @@ void TrafficGraph::findAllPathsUtil(Point* current, Point* destination, std::vec
     visited.insert(current);
 
     for (auto& edge : edges) {
-        // Check if the edge is connected to the current point and the other point is not visited
         if (edge.start == current && visited.find(edge.end) == visited.end()) {
             path.push_back(edge);
             findAllPathsUtil(edge.end, destination, path, allPaths, visited);
             path.pop_back();
         } else if (edge.end == current && visited.find(edge.start) == visited.end()) {
-            // Since the edges are undirected, also check the other direction
             path.push_back(edge);
             findAllPathsUtil(edge.start, destination, path, allPaths, visited);
             path.pop_back();
@@ -159,7 +160,7 @@ void TrafficGraph::findAllPathsUtil(Point* current, Point* destination, std::vec
     visited.erase(current);
 }
 
-std::vector<Route> findAllPaths(Point* source, Point* destination) {
+std::vector<Route>  TrafficGraph::findAllPaths(Point* source, Point* destination) {
         std::vector<Route> allPaths;
         std::vector<Edge> path;
         std::unordered_set<Point*> visited;
@@ -168,7 +169,7 @@ std::vector<Route> findAllPaths(Point* source, Point* destination) {
         return allPaths;
 }
 
-double jaccardSimilarity(const Route& route1, const Route& route2) {
+double jaccardSimilarity(Route& route1, Route& route2) {
         std::unordered_set<Edge*> edgesInRoute1;
         std::unordered_set<Edge*> edgesInRoute2;
 
@@ -191,32 +192,6 @@ double jaccardSimilarity(const Route& route1, const Route& route2) {
         return static_cast<double>(intersectionSize) / unionSize;
 }
 
-std::vector<Route> findAlternativePaths(Point* source, Point* destination) {
-    Route* shortestRoute = findShortestPath(source, destination);
-    std::vector<Route> allRoutes = findAllPaths(source, destination);
-
-    std::vector<std::pair<double, Route>> similarityScores;
-
-    for (auto& route : allRoutes) {
-        double similarity = jaccardSimilarity(*shortestRoute, route);
-        similarityScores.push_back(std::make_pair(similarity, route));
-    }
-
-    std::sort(similarityScores.begin(), similarityScores.end(), [](const std::pair<double, Route>& a, const std::pair<double, Route>& b) {
-        return a.first < b.first;
-    });
-
-    std::vector<Route> alternativeRoutes;
-    for (size_t i = 0; i < similarityScores.size() && alternativeRoutes.size() < 2; ++i) {
-        if (similarityScores[i].first != 0) {
-            alternativeRoutes.push_back(similarityScores[i].second);
-        }
-    }
-
-    delete shortestRoute;
-    return alternativeRoutes;
-}
-
 Route* reconstructRoute(Point* source, Point* destination, std::unordered_map<Point*, Edge*>& previous) {
     std::vector<Edge*> path;
     for (Point* at = destination; at != source; at = previous[at]->start) {
@@ -232,7 +207,6 @@ Route* reconstructRoute(Point* source, Point* destination, std::unordered_map<Po
 
     return shortestRoute;
 }
-
 
 Route* TrafficGraph::findShortestPath(Point* source, Point* destination) {
     std::unordered_map<Point*, double> distances;
@@ -271,4 +245,31 @@ Route* TrafficGraph::findShortestPath(Point* source, Point* destination) {
 
     // Destination is not reachable
     return nullptr;
+}
+
+
+std::vector<Route> TrafficGraph::findAlternativePaths(Point* source, Point* destination) {
+    Route* shortestRoute = findShortestPath(source, destination);
+    std::vector<Route> allRoutes = findAllPaths(source, destination);
+
+    std::vector<std::pair<double, Route>> similarityScores;
+
+    for (auto& route : allRoutes) {
+        double similarity = jaccardSimilarity(*shortestRoute, route);
+        similarityScores.push_back(std::make_pair(similarity, route));
+    }
+
+    std::sort(similarityScores.begin(), similarityScores.end(), [](const std::pair<double, Route>& a, const std::pair<double, Route>& b) {
+        return a.first < b.first;
+    });
+
+    std::vector<Route> alternativeRoutes;
+    for (size_t i = 0; i < similarityScores.size() && alternativeRoutes.size() < 2; ++i) {
+        if (similarityScores[i].first != 0) {
+            alternativeRoutes.push_back(similarityScores[i].second);
+        }
+    }
+
+    delete shortestRoute;
+    return alternativeRoutes;
 }
