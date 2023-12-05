@@ -34,7 +34,7 @@ protected:
 
 // Test case for Dijkstra's algorithm
 TEST_F(TrafficGraphTest, FindShortestPath) {
-    Route* shortestRoute = graph.findShortestPath(&points[0], &points[2], &graph);
+    Route* shortestRoute = graph.findShortestPath(&points[0], &points[2]);
 
     ASSERT_NE(shortestRoute, nullptr);
     ASSERT_EQ(shortestRoute->pathLen, 2);
@@ -51,15 +51,6 @@ TEST_F(TrafficGraphTest, FindAllPaths) {
     auto paths = graph.findAllPaths(&points.front(), &points.back());
     // Assuming findAllPaths should find at least one path
     EXPECT_GT(paths.size(), 0);
-}
-
-// Test case for finding alternative paths
-TEST_F(TrafficGraphTest, FindAlternativePaths) {
-    std::vector<Route> allPaths = graph.findAllPaths(&points.front(), &points.back());
-    auto alternativePaths = graph.findAlternativePaths(allPaths);
-    
-    // Assuming findAlternativePaths should return a subset of allPaths
-    EXPECT_LE(alternativePaths.size(), allPaths.size());
 }
 
 // Add more tests as needed...

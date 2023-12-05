@@ -1,3 +1,6 @@
 // main.cpp
-#include "graph.h"
-#include "qubo.h"
+#include "graph/graph.h"
+#include "qubo/qubo.h"
+
+int main(int argc, char **argv) {
+}

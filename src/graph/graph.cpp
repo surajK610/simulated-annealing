@@ -81,7 +81,7 @@ void TrafficGraph::initializePoints(unsigned int numPoints, unsigned int xBound,
 
 void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int additionalEdges, unsigned int xBound, unsigned int yBound) {
     std::cout << "Initializing points...\n";
-    std::unordered_set<Point*> inMST; // Declare inMST here
+    std::unordered_set<Point*> inMST;
 
     initializePoints(numPoints, xBound, yBound);
 
@@ -95,8 +95,6 @@ void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int addition
     auto comp = [](const Edge& e1, const Edge& e2) { return e1.distance > e2.distance; };
     std::priority_queue<Edge, std::vector<Edge>, decltype(comp)> pq(comp);
 
-
-    std::unordered_set<Point*> inMST;
     inMST.insert(&points[0]);
 
     for (size_t i = 1; i < points.size(); ++i) {
