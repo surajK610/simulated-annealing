@@ -40,23 +40,24 @@ struct Car {
 };
 
 class TrafficGraph {
+  
 private:
     std::vector<Point> points;
     std::vector<Edge> edges;
 
     double calculateDistance(const Point& a, const Point& b);
     void addClosestEdges(std::set<Edge>& mstEdges);
-    void initializePoints(unsigned int numPoints, unsigned int xBound, unsigned int yBound);
+    void initializePoints(unsigned int numPoints, unsigned int xBound, unsigned int yBound); // new method declaration
+    void addPoint(const Point& point);
+    void addEdge(Point* start, Point* end);
     void findAllPathsUtil(Point* current, Point* destination, std::vector<Edge>& path, std::vector<Route>& allPaths, std::unordered_set<Point*>& visited);
-
+  
 public:
-    TrafficGraph() = default;
 
     void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int additionalEdges, unsigned int xBound, unsigned int yBound);
-    void TrafficGraph::addPoint(const Point& point);
-    void TrafficGraph::addEdge(Point* start, Point* end);
-
     std::vector<Route> TrafficGraph::findAllPaths(Point* source, Point* destination);
     std::vector<Route> TrafficGraph::findAlternativePaths(Point* source, Point* destination);
     Route* TrafficGraph::findShortestPath(Point* source, Point* destination);
 };
+
+#endif
