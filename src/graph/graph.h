@@ -36,4 +36,5 @@ class TrafficGraph {
 
     std::vector<Route> findAllPaths(Point* source, Point* destination);
     std::vector<Route> findAlternativePaths(const std::vector<Route>& allPaths);
+    Route* findShortestPath(Point* source, Point* destination);
 };

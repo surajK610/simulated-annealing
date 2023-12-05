@@ -1,1 +1,1 @@
-add_library(quboSolver STATIC quboSolver.cpp)
+add_library(qubo STATIC qubo.cpp)

@@ -1,2 +1,3 @@
-#include "trafficGraph.h"
-#include "quboSolver.h"
+// main.cpp
+#include "graph.h"
+#include "qubo.h"
