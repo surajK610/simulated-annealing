@@ -53,6 +53,7 @@ private:
     void findAllPathsUtil(Point* current, Point* destination, std::vector<Edge>& path, std::vector<Route>& allPaths, std::unordered_set<Point*>& visited);
   
 public:
+    TrafficGraph() {}
     TrafficGraph(std::vector<Point>& initPoints, std::vector<Edge>& initEdges)
         : points(initPoints), edges(initEdges) {}
     void initializeGraph(unsigned int numPoints, unsigned int additionalEdges, unsigned int xBound, unsigned int yBound);

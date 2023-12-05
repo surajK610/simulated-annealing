@@ -3,11 +3,7 @@
 #include "gtest/gtest.h"
 #include "../src/qubo/qubo.h" // Update the relative path to your quboSolver.h
 
-// Since N is not defined in the snippet provided, we need to define it
-// This value should match the N used in quboSolver.cpp
-const int N = 3;
 
-// A simple test for calculateObjective function
 TEST(QuboSolver, CalculateObjective) {
     double Q[N][N] = {
         {1, -2, 1},
@@ -43,10 +39,4 @@ TEST(QuboSolver, MonteCarloQUBOSolver) {
     // compared to other random configurations. However, this could be nondeterministic
     // and not suitable for unit tests which should be deterministic. Such a test could
     // be part of a larger integration test suite.
-}
-
-// The main function to run all tests
-int main(int argc, char **argv) {
-    ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
 }
