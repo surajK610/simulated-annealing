@@ -1,4 +1,4 @@
-#include "trafficGraph.h"
+#include "graph.h"
 #include <random>
 #include <limits>
 #include <cmath>
@@ -6,36 +6,40 @@
 #include <unordered_set>
 #include <iostream>
 #include <random>
+#include <queue>  // Include for priority_queue
+#include <unordered_map>  // Include for unordered_map
 
 double TrafficGraph::calculateDistance(const Point& a, const Point& b) {
     return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
 }
 
 void TrafficGraph::addClosestEdges(std::set<Edge>& mstEdges) {
-    std::unordered_set<Point*> inMst;
+    std::unordered_set<Point*> inMST;
     for (const auto& edge : mstEdges) {
-        inMst.insert(edge.start);
-        inMst.insert(edge.end);
+        inMST.insert(edge.start);
+        inMST.insert(edge.end);
     }
 
     std::vector<Edge> closestEdges;
-    for (const auto& point : points) {
-        if (inMst.find(&point) == inMst.end()) continue;
+    for (auto& point : points) {
+        Point* pointPtr = &point;
+        if (inMST.find(pointPtr) != inMST.end()) continue;
 
         double minDistance = std::numeric_limits<double>::max();
         Point* closestPoint = nullptr;
 
-        for (const auto& other : points) {
-            if (&point == &other || inMst.find(&other) != inMst.end()) continue;
-            double distance = calculateDistance(point, other);
+        for (auto& other : points) {
+            Point* otherPtr = &other;
+            if (pointPtr == otherPtr || inMST.find(otherPtr) != inMST.end()) continue;
+            double distance = calculateDistance(*pointPtr, *otherPtr);
             if (distance < minDistance) {
                 minDistance = distance;
-                closestPoint = const_cast<Point*>(&other);
+                closestPoint = otherPtr;
             }
         }
 
         if (closestPoint) {
-            closestEdges.emplace_back(Edge{const_cast<Point*>(&point), closestPoint, minDistance});
+            closestEdges.emplace_back(Edge{pointPtr, closestPoint, minDistance});
         }
     }
 
@@ -44,12 +48,12 @@ void TrafficGraph::addClosestEdges(std::set<Edge>& mstEdges) {
     std::mt19937 g(rd());
     std::shuffle(closestEdges.begin(), closestEdges.end(), g);
 
-    // Assuming we want to add a fixed number or a percentage of these edges
-    size_t numEdgesToAdd = closestEdges.size() / 10; // for example, 10%
+    size_t numEdgesToAdd = closestEdges.size() / 10; // Example: 10%
     for (size_t i = 0; i < numEdgesToAdd; ++i) {
         edges.push_back(closestEdges[i]);
     }
 }
+
 
 void TrafficGraph::initializePoints(unsigned int numPoints, unsigned int xBound, unsigned int yBound) {
     std::random_device rd;
@@ -59,21 +63,24 @@ void TrafficGraph::initializePoints(unsigned int numPoints, unsigned int xBound,
     std::unordered_set<std::string> uniqueCheck;
 
     while (points.size() < numPoints) {
-        Point newPoint;
-        newPoint.x = disX(gen);
-        newPoint.y = disY(gen);
+        short unsigned int x = static_cast<short unsigned int>(disX(gen));
+        short unsigned int y = static_cast<short unsigned int>(disY(gen));
+        Point newPoint{x, y};
 
         std::string pointKey = std::to_string(newPoint.x) + "-" + std::to_string(newPoint.y);
-        if (uniqueCheck.find(pointKey) == uniqueCheck.end()) {
+        if (uniqueCheck.insert(pointKey).second) {
             points.push_back(newPoint);
-            uniqueCheck.insert(pointKey);
             std::cout << "Generated unique point: (" << newPoint.x << ", " << newPoint.y << ")\n";
         }
     }
 }
 
+
+
 void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int additionalEdges, unsigned int xBound, unsigned int yBound) {
     std::cout << "Initializing points...\n";
+    std::unordered_set<Point*> inMST; // Declare inMST here
+
     initializePoints(numPoints, xBound, yBound);
 
     if (points.size() < 2) {
@@ -88,7 +95,6 @@ void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int addition
     std::priority_queue<Edge, std::vector<Edge>, decltype(comp)> pq(comp);
 
     // Start from the first point
-    std::unordered_set<Point*> inMST;
     inMST.insert(&points[0]);
 
     // Add all edges from the starting point to the priority queue
@@ -112,7 +118,7 @@ void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int addition
         std::cout << "Added edge between (" << smallestEdge.start->x << "," << smallestEdge.start->y << ") and (" << smallestEdge.end->x << "," << smallestEdge.end->y << ") with distance " << smallestEdge.distance << ".\n";
 
         // Add new edges to the priority queue
-        for (const auto& point : points) {
+        for (auto& point : points) {
             if (inMST.find(&point) == inMST.end()) {
                 double dist = calculateDistance(*smallestEdge.end, point);
                 pq.push(Edge{smallestEdge.end, const_cast<Point*>(&point), dist});
@@ -137,9 +143,19 @@ void TrafficGraph::addEdge(Point* start, Point* end) {
 }
 
 
-std::vector<Route> TrafficGraph::findAllPaths(Point* source, Point* destination);
-std::vector<Route> TrafficGraph::findAlternativePaths(Point* source, Point* destination);
+std::vector<Route> TrafficGraph::findAllPaths(Point* source, Point* destination) {
+    // Implement the logic to find all paths between source and destination
+    std::vector<Route> allPaths;
+    // Logic to populate allPaths
+    return allPaths;
+}
 
+std::vector<Route> TrafficGraph::findAlternativePaths(Point* source, Point* destination) {
+    // Implement the logic to find alternative paths
+    std::vector<Route> alternativePaths;
+    // Logic to populate alternativePaths
+    return alternativePaths;
+}
 
 Route* TrafficGraph::findShortestPath(Point* source, Point* destination) {
     std::unordered_map<Point*, double> distances;

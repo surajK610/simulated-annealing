@@ -47,13 +47,16 @@ private:
     double calculateDistance(const Point& a, const Point& b);
     void addClosestEdges(std::set<Edge>& mstEdges);
     void initializePoints(unsigned int numPoints, unsigned int xBound, unsigned int yBound); // new method declaration
-
-public:
-    TrafficGraph() = default;
-    void initializeGraph(unsigned int numPoints, unsigned int additionalEdges, unsigned int xBound, unsigned int yBound); // modified method signature
     void addPoint(const Point& point);
     void addEdge(Point* start, Point* end);
+
+public:
+    // Correct the method declarations to match the .cpp file
     std::vector<Route> findAllPaths(Point* source, Point* destination);
-    std::vector<Route> findAlternativePaths(const std::vector<Route>& allPaths);
-    Route* findShortestPath(Point* source, Point* destination);
+    std::vector<Route> findAlternativePaths(Point* source, Point* destination);
+    void initializeGraph(unsigned int numPoints, unsigned int additionalEdges, unsigned int xBound, unsigned int yBound);
+
+    Route* findShortestPath(Point* source, Point* destination);  // Ensure this matches with the .cpp implementation
 };
+
+#endif
