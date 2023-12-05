@@ -43,16 +43,19 @@ private:
     std::vector<Point> points;
     std::vector<Edge> edges;
 
-    // Helpers for Prim's algorithm
     double calculateDistance(const Point& a, const Point& b);
     void addClosestEdges(std::set<Edge>& mstEdges);
-    void initializePoints(unsigned int numPoints, unsigned int xBound, unsigned int yBound); // new method declaration
+    void initializePoints(unsigned int numPoints, unsigned int xBound, unsigned int yBound);
+
+    void findAllPathsUtil(Point* current, Point* destination, std::vector<Edge>& path, std::vector<Route>& allPaths, std::unordered_set<Point*>& visited);
 
 public:
     TrafficGraph() = default;
-    void initializeGraph(unsigned int numPoints, unsigned int additionalEdges, unsigned int xBound, unsigned int yBound); // modified method signature
+
+    void initializeGraph(unsigned int numPoints, unsigned int additionalEdges, unsigned int xBound, unsigned int yBound);
     void addPoint(const Point& point);
     void addEdge(Point* start, Point* end);
+
     std::vector<Route> findAllPaths(Point* source, Point* destination);
     std::vector<Route> findAlternativePaths(const std::vector<Route>& allPaths);
     Route* findShortestPath(Point* source, Point* destination);

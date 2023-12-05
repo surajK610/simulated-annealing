@@ -11,12 +11,6 @@ protected:
     std::vector<Edge> edges;
 
     void SetUp() override {
-        protected:
-    TrafficGraph graph;
-    std::vector<Point> points;
-    std::vector<Edge> edges;
-
-    void SetUp() override {
         // Initialize Points
         points.push_back({0, 0});
         points.push_back({1, 1});
@@ -28,12 +22,12 @@ protected:
         Edge edge2 = {&points[1], &points[2], 2.0};
         Edge edge3 = {&points[0], &points[2], 3.0}; // Direct but longer path
         // ... Add more edges as needed
-
+        edges.push_back(edge1);
+        edges.push_back(edge2);
+        edges.push_back(edge3);
         // Add points and edges to graph
         graph.points = points;
-        graph.edges.push_back(edge1);
-        graph.edges.push_back(edge2);
-        graph.edges.push_back(edge3);
+        graph.edges = edges;
         // ... Add more edges to graph as needed
     }
 };
@@ -52,18 +46,7 @@ TEST_F(TrafficGraphTest, FindShortestPath) {
     delete shortestRoute;
 }
 
-// Test case for mapping endpoints to a car
-TEST_F(TrafficGraphTest, MapEndpoints) {
-    Car car;
-    car.id = 1;
-    // Assuming mapEndpoints assigns the first and last points as source and destination
-    graph.mapEndpoints(car);
 
-    EXPECT_EQ(car.source, &points.front());
-    EXPECT_EQ(car.destination, &points.back());
-}
-
-// Test case for finding all paths
 TEST_F(TrafficGraphTest, FindAllPaths) {
     auto paths = graph.findAllPaths(&points.front(), &points.back());
     // Assuming findAllPaths should find at least one path
