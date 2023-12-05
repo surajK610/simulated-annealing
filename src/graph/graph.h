@@ -55,6 +55,5 @@ public:
     void addEdge(Point* start, Point* end);
     std::vector<Route> findAllPaths(Point* source, Point* destination);
     std::vector<Route> findAlternativePaths(const std::vector<Route>& allPaths);
+    Route* findShortestPath(Point* source, Point* destination);
 };
-
-#endif // TRAFFIC_GRAPH_H

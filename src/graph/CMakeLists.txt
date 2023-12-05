@@ -1,1 +1,1 @@
-add_library(graph STATIC trafficGraph.cpp)
+add_library(graph STATIC graph.cpp)

@@ -11,21 +11,46 @@ protected:
     std::vector<Edge> edges;
 
     void SetUp() override {
+        protected:
+    TrafficGraph graph;
+    std::vector<Point> points;
+    std::vector<Edge> edges;
+
+    void SetUp() override {
         // Initialize Points
         points.push_back({0, 0});
         points.push_back({1, 1});
+        points.push_back({2, 2}); // Added an extra point for the shortest path test
         // ... Add more points as needed
 
         // Initialize Edges
         Edge edge1 = {&points[0], &points[1], 1.0};
+        Edge edge2 = {&points[1], &points[2], 2.0};
+        Edge edge3 = {&points[0], &points[2], 3.0}; // Direct but longer path
         // ... Add more edges as needed
 
         // Add points and edges to graph
         graph.points = points;
         graph.edges.push_back(edge1);
+        graph.edges.push_back(edge2);
+        graph.edges.push_back(edge3);
         // ... Add more edges to graph as needed
     }
 };
+
+// Test case for Dijkstra's algorithm
+TEST_F(TrafficGraphTest, FindShortestPath) {
+    Route* shortestRoute = graph.findShortestPath(&points[0], &points[2], &graph);
+
+    ASSERT_NE(shortestRoute, nullptr);
+    ASSERT_EQ(shortestRoute->pathLen, 2);
+    EXPECT_EQ(shortestRoute->route[0].start, &points[0]);
+    EXPECT_EQ(shortestRoute->route[0].end, &points[1]);
+    EXPECT_EQ(shortestRoute->route[1].start, &points[1]);
+    EXPECT_EQ(shortestRoute->route[1].end, &points[2]);
+
+    delete shortestRoute;
+}
 
 // Test case for mapping endpoints to a car
 TEST_F(TrafficGraphTest, MapEndpoints) {
