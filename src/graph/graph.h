@@ -66,8 +66,8 @@ public:
     std::vector<Route> findAlternativePaths(Point* source, Point* destination);
     
     Route* findShortestPath(Point* source, Point* destination);
-    std::vector<Point> getPoints() { return *points; }
-    std::vector<Edge> getEdges() { return *edges; }
+    std::vector<Point>* getPoints() { return points; }
+    std::vector<Edge>* getEdges() { return edges; }
 
     // Car methods
     void initializeCars(std::vector<Car>& cars, unsigned int numCars, double minDistanceThreshold);

@@ -129,7 +129,21 @@ void TrafficGraph::add_random_edges(const std::set<Edge>& mstEdges, unsigned int
     std::cerr << "Finished adding random edges. Total added: " << addedEdges << "\n";
 }
 
+void printPoints(const std::vector<Point>& points) {
+    std::cout << "Points:" << std::endl;
+    for (const auto& point : points) {
+        std::cout << &point <<  " (" << point.x << ", " << point.y << ")" << std::endl;
+    }
+}
 
+void printEdges(const std::vector<Edge>& edges) {
+    std::cout << "Edges:" << std::endl;
+    for (const auto& edge : edges) {
+        std::cout << "Start: " << edge.start << " (" << edge.start->x << ", " << edge.start->y << "), "
+                    << "End: " << edge.end << " (" <<  edge.end->x << ", " << edge.end->y << "), "
+                    << "Distance: " << edge.distance << std::endl;
+    }
+}
 void TrafficGraph::initializePoints(unsigned int numPoints, unsigned int xBound, unsigned int yBound) {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -149,9 +163,8 @@ void TrafficGraph::initializePoints(unsigned int numPoints, unsigned int xBound,
             // std::cerr << "Generated unique point: (" << newPoint.x << ", " << newPoint.y << ")\n";
         }
     }
+    printPoints(*points);
 }
-
-
 
 void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int additionalEdges, unsigned int xBound, unsigned int yBound) {
     
@@ -165,6 +178,7 @@ void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int addition
     std::unordered_set<Point*> inMST;
 
     initializePoints(numPoints, xBound, yBound);
+    printPoints(*points);
 
     if (points->size() < 2) {
         std::cerr << "Insufficient points to form a graph.\n";
@@ -212,7 +226,8 @@ void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int addition
     for (const auto& edge : mstEdges) {
         addEdge(edge.start, edge.end);
     }
-
+    printPoints(*points);
+     
     std::cerr << "Additional edges added.\n";
 }
 
@@ -269,7 +284,7 @@ double jaccardSimilarity(Route& route1, Route& route2) {
         for (int i = 0; i < route1.pathLen; ++i) {
             edgesInRoute1.insert(&route1.route[i]);
         }
-
+        
         for (int i = 0; i < route2.pathLen; ++i) {
             edgesInRoute2.insert(&route2.route[i]);
         }
