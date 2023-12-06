@@ -3,7 +3,6 @@
 #include "gtest/gtest.h"
 #include "../src/graph/graph.h"
 
-
 class TrafficGraphTest : public ::testing::Test {
 protected:
     TrafficGraph graph;
@@ -44,6 +43,26 @@ TEST_F(TrafficGraphTest, FindShortestPath) {
     EXPECT_EQ(shortestRoute->route[1].end, &points[2]);
 
     delete shortestRoute;
+}
+
+TEST_F(TrafficGraphTest, InitializePoints) {
+    unsigned int numPoints = 10;
+    unsigned int xBound = 100;
+    unsigned int yBound = 100;
+
+    graph.initializePoints(numPoints, xBound, yBound);
+
+    ASSERT_EQ(graph.getPoints().size(), numPoints); // Check if the correct number of points are initialized
+    for (const auto& point : graph.getPoints()) {
+        ASSERT_TRUE(point.x >= 0 && point.x <= xBound);
+        ASSERT_TRUE(point.y >= 0 && point.y <= yBound);
+    }
+
+    graph.initializePoints(10, 0, 0);
+    ASSERT_TRUE(graph.getPoints().empty()); 
+
+    graph.initializeGraph(1, 5, 100, 100); // Only one point
+    ASSERT_TRUE(graph.getEdges().empty()); // Expect no edges to be formed
 }
 
 TEST_F(TrafficGraphTest, FindAllPaths) {

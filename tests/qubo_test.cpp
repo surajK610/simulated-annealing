@@ -4,7 +4,7 @@
 #include "../src/qubo/qubo.h" // Update the relative path to your quboSolver.h
 
 
-TEST(QuboSolver, CalculateObjective) {
+TEST(Qubo, CalculateObjective) {
     double Q[N][N] = {
         {1, -2, 1},
         {-2, 4, -2},
@@ -19,7 +19,7 @@ TEST(QuboSolver, CalculateObjective) {
 
 // A test for monteCarloQUBOSolver function
 // This test ensures that the function returns a valid configuration
-TEST(QuboSolver, MonteCarloQUBOSolver) {
+TEST(Qubo, MonteCarloQUBOSolver) {
     double Q[N][N] = {
         {1, -2, 1},
         {-2, 4, -2},
