@@ -13,6 +13,10 @@ struct Point {
     bool operator<(const Point& other) const {
         return (x < other.x) || (x == other.x && y < other.y);
     }
+
+    bool operator==(const Point& other) const {
+        return (x == other.x) && (y == other.y);
+    }
 };
 
 struct Edge {
@@ -55,10 +59,12 @@ public:
     TrafficGraph() : points(nullptr), edges(nullptr) {}
     TrafficGraph(std::vector<Point>* initPoints, std::vector<Edge>* initEdges)
         : points(initPoints), edges(initEdges) {}
+    void add_random_edges(const std::set<Edge>& mstEdges, unsigned int additionalEdges);
     void initializePoints(unsigned int numPoints, unsigned int xBound, unsigned int yBound); // new method declaration
     void initializeGraph(unsigned int numPoints, unsigned int additionalEdges, unsigned int xBound, unsigned int yBound);
     std::vector<Route> findAllPaths(Point* source, Point* destination);
     std::vector<Route> findAlternativePaths(Point* source, Point* destination);
+    
     Route* findShortestPath(Point* source, Point* destination);
     std::vector<Point> getPoints() { return *points; }
     std::vector<Edge> getEdges() { return *edges; }
