@@ -68,6 +68,22 @@ public:
     Route* findShortestPath(Point* source, Point* destination);
     std::vector<Point> getPoints() { return *points; }
     std::vector<Edge> getEdges() { return *edges; }
+
+    // Car methods
+    void initializeCars(std::vector<Car>& cars, unsigned int numCars, double minDistanceThreshold);
+    void setCarRoute(Car& car, const Route& route, unsigned int routeIndex);
+    void updateCarRoute(Car& car, const Route& newRoute, unsigned int routeIndex);
+
+    // Helper methods
+    Point* getRandomPoint();
+    bool isDistanceSufficient(const Point& a, const Point& b, double threshold);
+    double** routes_to_q(const std::vector<Car>& cars);
+    int calculateQMatrixSize(const std::vector<Car>& cars);
+    double calculateRouteCost(const Route& route);
+    double calculateSharedCost(const Route& route1, const Route& route2);
+    bool routesShareSegment(const Route& route1, const Route& route2);
+
+
 };
 
 #endif

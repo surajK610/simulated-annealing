@@ -11,6 +11,7 @@
 #include <vector>
 #include <queue>
 
+
 double TrafficGraph::calculateDistance(const Point& a, const Point& b) {
     return std::sqrt(std::pow(a.x - b.x, 2) + std::pow(a.y - b.y, 2));
 }
@@ -380,4 +381,147 @@ std::vector<Route> TrafficGraph::findAlternativePaths(Point* source, Point* dest
 
     delete shortestRoute;
     return alternativeRoutes;
+}
+
+//////////////////////////////////////////////////////////////
+// TrafficRoute Methods (Cars)
+//////////////////////////////////////////////////////////////
+
+
+
+double** TrafficGraph::routes_to_q(const std::vector<Car>& cars) {
+    // Determine the size of the Q matrix
+    int size = calculateQMatrixSize(cars); // You need to implement this
+    double** Q = new double*[size];
+
+    for (int i = 0; i < size; ++i) {
+        Q[i] = new double[size](); // Initialize to zero
+    }
+
+    try {
+        for (const auto& car : cars) {
+            for (int i = 0; i < Car::MAX_POSSIBLE_ROUTES; ++i) {
+                // Set diagonal based on route cost
+                double routeCost = calculateRouteCost(car.possibleRoutes[i]); // Implement this
+                Q[i][i] = routeCost;
+
+                // Set off-diagonal based on shared segments
+                for (int j = i + 1; j < Car::MAX_POSSIBLE_ROUTES; ++j) {
+                    if (routesShareSegment(car.possibleRoutes[i], car.possibleRoutes[j])) { // Implement this
+                        double sharedCost = calculateSharedCost(car.possibleRoutes[i], car.possibleRoutes[j]); // Implement this
+                        Q[i][j] = Q[j][i] = sharedCost;
+                    }
+                }
+            }
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error in routes_to_q: " << e.what() << std::endl;
+        // Cleanup if needed
+        for (int i = 0; i < size; ++i) {
+            delete[] Q[i];
+        }
+        delete[] Q;
+        throw; // rethrow the exception
+    }
+
+    return Q;
+}
+
+
+int TrafficGraph::calculateQMatrixSize(const std::vector<Car>& cars) {
+    if (cars.empty()) return 0;
+    int numRoutesPerCar = Car::MAX_POSSIBLE_ROUTES; // Assuming a constant number of possible routes per car
+    return cars.size() * numRoutesPerCar;
+}
+
+double TrafficGraph::calculateRouteCost(const Route& route) {
+    double cost = 0.0;
+    for (int i = 0; i < route.pathLen - 1; ++i) {
+        Point* start = route.route[i].start; // Corrected
+        Point* end = route.route[i].end;     // Corrected
+        cost += calculateDistance(*start, *end);
+    }
+    return cost;
+}
+
+double TrafficGraph::calculateSharedCost(const Route& route1, const Route& route2) {
+    double sharedCost = 0.0;
+    if (routesShareSegment(route1, route2)) {
+        // Cost can be a constant or based on the length of shared segments
+        sharedCost = 10.0; // Example fixed cost
+    }
+    return sharedCost;
+}
+
+bool TrafficGraph::routesShareSegment(const Route& route1, const Route& route2) {
+    std::unordered_set<const Edge*> edgesInRoute1; // Type changed to const Edge*
+    for (int i = 0; i < route1.pathLen; ++i) {
+        edgesInRoute1.insert(&route1.route[i]);
+    }
+
+    for (int i = 0; i < route2.pathLen; ++i) {
+        if (edgesInRoute1.find(&route2.route[i]) != edgesInRoute1.end()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Implementation of getRandomPoint
+Point* TrafficGraph::getRandomPoint() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, points->size() - 1);
+    int index = dis(gen);
+    return &((*points)[index]);
+}
+
+// Implementation of isDistanceSufficient
+bool TrafficGraph::isDistanceSufficient(const Point& a, const Point& b, double threshold) {
+    double distance = calculateDistance(a, b);
+    return distance >= threshold;
+}
+
+// Implementation of initializeCars
+void TrafficGraph::initializeCars(std::vector<Car>& cars, unsigned int numCars, double minDistanceThreshold) {
+    cars.clear();
+    cars.reserve(numCars);
+    
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    for (unsigned int i = 0; i < numCars; ++i) {
+        Car car;
+        car.id = i;
+
+        Point* src = nullptr;
+        Point* dest = nullptr;
+        do {
+            src = getRandomPoint();
+            dest = getRandomPoint();
+        } while (!isDistanceSufficient(*src, *dest, minDistanceThreshold));
+
+        car.source = src;
+        car.destination = dest;
+        cars.push_back(car);
+
+        std::cerr << "Car ID " << car.id << " assigned source (" << src->x << ", " << src->y 
+                  << ") and destination (" << dest->x << ", " << dest->y << ").\n";
+    }
+}
+
+void TrafficGraph::setCarRoute(Car& car, const Route& route, unsigned int routeIndex) {
+    if (routeIndex < Car::MAX_POSSIBLE_ROUTES) {
+        car.possibleRoutes[routeIndex] = route;
+    } else {
+        std::cerr << "Error: Invalid route index in setCarRoute for car ID " << car.id << std::endl;
+    }
+}
+
+void TrafficGraph::updateCarRoute(Car& car, const Route& newRoute, unsigned int routeIndex) {
+    if (routeIndex < Car::MAX_POSSIBLE_ROUTES) {
+        car.possibleRoutes[routeIndex] = newRoute;
+    } else {
+        std::cerr << "Error: Invalid route index in updateCarRoute for car ID " << car.id << std::endl;
+    }
 }

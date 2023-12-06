@@ -272,3 +272,99 @@ TEST_F(TrafficGraphTest, FindAllPaths_RandomGraph) {
 //     auto paths = graph.findAllPaths(&points.front(), &points.back());
 //     EXPECT_GT(paths.size(), 0);
 // }
+
+
+// Tests for initializeCars method
+TEST_F(TrafficGraphTest, InitializeCars) {
+    unsigned int numCars = 5;
+    double minDistanceThreshold = 10.0;
+    std::vector<Car> cars;
+
+    graph.initializeCars(cars, numCars, minDistanceThreshold);
+    ASSERT_EQ(cars.size(), numCars);
+
+    for (size_t i = 0; i < cars.size(); ++i) {
+        ASSERT_NE(cars[i].source, nullptr);
+        ASSERT_NE(cars[i].destination, nullptr);
+        ASSERT_TRUE(graph.isDistanceSufficient(*cars[i].source, *cars[i].destination, minDistanceThreshold));
+    }
+}
+
+// Tests for setCarRoute method
+TEST_F(TrafficGraphTest, SetCarRoute) {
+    std::vector<Car> cars;
+    unsigned int numCars = 3;
+    double minDistanceThreshold = 10.0;
+    graph.initializeCars(cars, numCars, minDistanceThreshold);
+
+    Route testRoute;
+    testRoute.pathLen = 2;
+    testRoute.route[0] = edges[0];
+    testRoute.route[1] = edges[1];
+
+    graph.setCarRoute(cars[0], testRoute, 0);
+    ASSERT_EQ(cars[0].possibleRoutes[0].pathLen, testRoute.pathLen);
+    ASSERT_EQ(cars[0].possibleRoutes[0].route[0], testRoute.route[0]);
+    ASSERT_EQ(cars[0].possibleRoutes[0].route[1], testRoute.route[1]);
+}
+
+// Tests for updateCarRoute method
+TEST_F(TrafficGraphTest, UpdateCarRoute) {
+    std::vector<Car> cars;
+    unsigned int numCars = 3;
+    double minDistanceThreshold = 10.0;
+    graph.initializeCars(cars, numCars, minDistanceThreshold);
+
+    Route newRoute;
+    newRoute.pathLen = 3;
+    newRoute.route[0] = edges[0];
+    newRoute.route[1] = edges[1];
+    newRoute.route[2] = edges[2];
+
+    graph.setCarRoute(cars[0], newRoute, 0);
+    graph.updateCarRoute(cars[0], newRoute, 0);
+
+    ASSERT_EQ(cars[0].possibleRoutes[0].pathLen, newRoute.pathLen);
+    ASSERT_EQ(cars[0].possibleRoutes[0].route[0], newRoute.route[0]);
+    ASSERT_EQ(cars[0].possibleRoutes[0].route[1], newRoute.route[1]);
+    ASSERT_EQ(cars[0].possibleRoutes[0].route[2], newRoute.route[2]);
+}
+
+// Tests for calculateRouteCost method
+TEST_F(TrafficGraphTest, CalculateRouteCost) {
+    Route route;
+    route.pathLen = 2;
+    route.route[0] = edges[0];
+    route.route[1] = edges[1];
+
+    double expectedCost = edges[0].distance + edges[1].distance;
+    double actualCost = graph.calculateRouteCost(route);
+    ASSERT_NEAR(actualCost, expectedCost, 1e-6); // Use a small tolerance for floating-point comparison
+}
+
+// Tests for calculateSharedCost method
+TEST_F(TrafficGraphTest, CalculateSharedCost) {
+    Route route1, route2;
+    route1.pathLen = route2.pathLen = 2;
+    route1.route[0] = route2.route[0] = edges[0];
+    route1.route[1] = edges[1];
+    route2.route[1] = edges[1];
+
+    double expectedSharedCost = 10.0; // Assuming fixed shared cost
+    double actualSharedCost = graph.calculateSharedCost(route1, route2);
+    ASSERT_EQ(actualSharedCost, expectedSharedCost);
+}
+
+// Tests for routesShareSegment method
+// Tests for routesShareSegment method
+TEST_F(TrafficGraphTest, RoutesShareSegment) {
+    Route route1, route2;
+    route1.pathLen = route2.pathLen = 2;
+    route1.route[0] = route2.route[0] = edges[0];
+    route1.route[1] = edges[1];
+    route2.route[1] = edges[2];
+
+    ASSERT_TRUE(graph.routesShareSegment(route1, route2));
+    route2.route[0] = edges[2]; // Change one edge to ensure routes don't share a segment
+    ASSERT_FALSE(graph.routesShareSegment(route1, route2));
+}
