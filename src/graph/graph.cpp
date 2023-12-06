@@ -54,6 +54,16 @@ void TrafficGraph::addClosestEdges(std::set<Edge>& mstEdges) {
     for (size_t i = 0; i < numEdgesToAdd; ++i) {
         edges.push_back(closestEdges[i]);
     }
+
+    std::cerr << "Adding the Additional Edges To The Edge List (ClostestEdgeFunction)...\n";
+
+    // Log the edges that were added
+    for (size_t i = 0; i < numEdgesToAdd; ++i) {
+        const Edge& addedEdge = closestEdges[i];
+        std::cerr << i + 1 << ": Added edge between (" << addedEdge.start->x << "," << addedEdge.start->y
+                  << ") and (" << addedEdge.end->x << "," << addedEdge.end->y << ") with distance "
+                  << addedEdge.distance << ".\n";
+    }
 }
 
 
@@ -81,6 +91,13 @@ void TrafficGraph::initializePoints(unsigned int numPoints, unsigned int xBound,
 
 
 void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int additionalEdges, unsigned int xBound, unsigned int yBound) {
+    
+    // Clear the points and edges vectors to start with empty containers
+    points.clear();
+    edges.clear();
+    std::cerr << "Points vector cleared. Size after: " << points.size() << std::endl;
+    std::cerr << "Edges vector cleared. Size after: " << edges.size() << std::endl;
+
     std::cerr << "Initializing points...\n";
     std::unordered_set<Point*> inMST;
 
@@ -126,6 +143,13 @@ void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int addition
     std::cout << "Prim's algorithm completed. MST formed.\n";
 
     addClosestEdges(mstEdges);
+    std::cout << "Additional edges added.\n";
+
+    // Add each edge from mstEdges to the edges list
+    for (const auto& edge : mstEdges) {
+        addEdge(edge.start, edge.end);
+    }
+
     std::cout << "Additional edges added.\n";
 }
 
