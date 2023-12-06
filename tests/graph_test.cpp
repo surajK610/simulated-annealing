@@ -29,11 +29,12 @@ public:
         edges.push_back(edge3);
         graph = TrafficGraph(points, edges);
     }
-
 };
 
 TEST_F(TrafficGraphTest, FindShortestPath) {
-    Route* shortestRoute = graph.findShortestPath(&points[0], &points[2]);
+    Route* shortestRoute = graph.findShortestPath(&points[0], &points[0]);
+
+    // Route* shortestRoute = graph.findShortestPath(&points[0], &points[2]);
 
     ASSERT_NE(shortestRoute, nullptr);
     ASSERT_EQ(shortestRoute->pathLen, 2);

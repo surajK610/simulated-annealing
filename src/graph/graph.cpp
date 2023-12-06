@@ -239,17 +239,14 @@ Route* TrafficGraph::findShortestPath(Point* source, Point* destination) {
         std::cerr << "Made here\n";
 
         for (auto& edge : edges) {
+            Point* neighbor = nullptr;
             if (edge.start == current) {
-                Point* neighbor = edge.end;
-                double newDist = distances[current] + edge.distance;
-                if (newDist < distances[neighbor]) {
-                    distances[neighbor] = newDist;
-                    previous[neighbor] = &edge;
-                    queue.push(neighbor);
-                }
+                neighbor = edge.end;
+            } else if (edge.end == current) {
+                neighbor = edge.start; // Consider the edge in the reverse direction for undirected graph
             }
-            else if (edge.end == current) {
-                Point* neighbor = edge.start;
+
+            if (neighbor) {
                 double newDist = distances[current] + edge.distance;
                 if (newDist < distances[neighbor]) {
                     distances[neighbor] = newDist;
