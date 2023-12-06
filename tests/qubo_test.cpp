@@ -39,25 +39,25 @@ TEST(Qubo, CalculateObjective) {
 }
 
 // A test for monteCarloQUBOSolver function
-// TEST(Qubo, MonteCarloQUBOSolver) {
-//     double staticQ[3][3] = {
-//         {1, -2, 1},
-//         {-2, 4, -2},
-//         {1, -2, 1}
-//     };
-//     double** Q = createDynamic2DArray(staticQ, 3);
-//     int numSamples = 1000; // Number of samples for the Monte Carlo simulation
-//     int bestConfiguration[3];
+TEST(Qubo, MonteCarloQUBOSolver) {
+    double staticQ[3][3] = {
+        {1, -2, 1},
+        {-2, 4, -2},
+        {1, -2, 1}
+    };
+    double** Q = createDynamic2DArray(staticQ, 3);
+    int numSamples = 1000; // Number of samples for the Monte Carlo simulation
+    int bestConfiguration[3];
 
-//     monteCarloQUBOSolver(Q, numSamples, bestConfiguration, 3);
+    monteCarloQUBOSolver(Q, numSamples, bestConfiguration, 3);
 
-//     // Ensure the best configuration is a valid binary string
-//     for (int i = 0; i < 3; ++i) {
-//         EXPECT_TRUE(bestConfiguration[i] == 0 || bestConfiguration[i] == 1);
-//     }
+    // Ensure the best configuration is a valid binary string
+    for (int i = 0; i < 3; ++i) {
+        EXPECT_TRUE(bestConfiguration[i] == 0 || bestConfiguration[i] == 1);
+    }
 
-//     deleteDynamic2DArray(Q, 3); // Clean up dynamic array
-// }
+    deleteDynamic2DArray(Q, 3); // Clean up dynamic array
+}
 
 // Additional test cases for CalculateObjective function
 TEST(QuboSolver, CalculateObjectiveAdditionalCases) {

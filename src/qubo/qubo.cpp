@@ -25,13 +25,13 @@ void monteCarloQUBOSolver(double** Q, int numSamples, int* bestConfiguration, in
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, 1);
 
-    try {
-        #pragma omp parallel shared(bestObjectiveValue, bestConfiguration)
-        {
+    // try {
+    //     #pragma omp parallel shared(bestObjectiveValue, bestConfiguration)
+    //     {
             int* threadLocalBestConfiguration = new int[size];
             double threadLocalBestObjectiveValue = std::numeric_limits<double>::infinity();
 
-            #pragma omp for nowait
+            // #pragma omp for nowait
             for (int sample = 0; sample < numSamples; ++sample) {
                 int* currentConfiguration = new int[size];
                 for (int i = 0; i < size; ++i) {
@@ -48,21 +48,21 @@ void monteCarloQUBOSolver(double** Q, int numSamples, int* bestConfiguration, in
                 delete[] currentConfiguration;
             }
 
-            #pragma omp critical
-            {
+            // #pragma omp critical
+            // {
                 if (threadLocalBestObjectiveValue < bestObjectiveValue) {
                     bestObjectiveValue = threadLocalBestObjectiveValue;
                     std::swap(bestConfiguration, threadLocalBestConfiguration);
                 }
-            }
+            // }
 
-            delete[] threadLocalBestConfiguration;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Error in monteCarloQUBOSolver: " << e.what() << std::endl;
-        delete[] localBestConfiguration;
-        throw;
-    }
+            // delete[] threadLocalBestConfiguration;
+        // }
+    // } catch (const std::exception& e) {
+    //     std::cerr << "Error in monteCarloQUBOSolver: " << e.what() << std::endl;
+    //     delete[] localBestConfiguration;
+    //     throw;
+    // }
 
-    delete[] localBestConfiguration;
+    // delete[] localBestConfiguration;
 }
