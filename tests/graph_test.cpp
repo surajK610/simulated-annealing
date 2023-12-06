@@ -132,7 +132,7 @@ TEST_F(TrafficGraphTest, InitializePoints) {
 
     graph.initializePoints(numPoints, xBound, yBound);
 
-    std::cout << "Checking number of points initialized..." << std::endl;
+    // std::cout << "Checking number of points initialized..." << std::endl;
     ASSERT_EQ(graph.getPoints()->size(), numPoints);
     // printPoints(graph.getPoints());    
     
@@ -142,7 +142,7 @@ TEST_F(TrafficGraphTest, InitializePoints) {
     }
    
     // Test Case 1: Initialize graph with a small number of points and edges
-    std::cerr << "////////// Test Case 1: Small number of points and edges //////////\n";
+    // std::cerr << "////////// Test Case 1: Small number of points and edges //////////\n";
 
     graph.initializeGraph(5, 3, 50, 50);  // 5 points, 3 additional edges
     // printPoints(graph.getPoints());
@@ -152,7 +152,7 @@ TEST_F(TrafficGraphTest, InitializePoints) {
     ASSERT_FALSE(graph.getEdges()->empty());
 
     // Test Case 2: Initialize graph with no additional edges
-    std::cerr << "////////// Test Case 2: No additional edges //////////\n";
+    // std::cerr << "////////// Test Case 2: No additional edges //////////\n";
 
 
     graph.initializeGraph(4, 0, 30, 30);  // 4 points, no additional edges
@@ -162,7 +162,7 @@ TEST_F(TrafficGraphTest, InitializePoints) {
     ASSERT_EQ(graph.getEdges()->size(), 3);  // Edges forming a Minimum Spanning Tree
 
     // Test Case 3: Large graph
-    std::cerr << "////////// Test Case 3: Large graph //////////\n";
+    // std::cerr << "////////// Test Case 3: Large graph //////////\n";
 
     graph.initializeGraph(20, 10, 100, 100);  // 20 points, 10 additional edges
 
@@ -170,7 +170,7 @@ TEST_F(TrafficGraphTest, InitializePoints) {
     ASSERT_FALSE(graph.getEdges()->empty());
 
     // Test Case 4: Edge case with only 1 point (no edges should be formed)
-    std::cerr << "////////// Test Case 4: Single point //////////\n";
+    // std::cerr << "////////// Test Case 4: Single point //////////\n";
 
     graph.initializeGraph(1, 5, 100, 100);  // 1 point, request for additional edges
 
@@ -178,7 +178,7 @@ TEST_F(TrafficGraphTest, InitializePoints) {
     ASSERT_TRUE(graph.getEdges()->empty());  // No edges possible with a single point
 
     // Test Case 5: Edge case with zero points
-    std::cerr << "////////// Test Case 5: Zero Points //////////\n";
+    // std::cerr << "////////// Test Case 5: Zero Points //////////\n";
 
     graph.initializeGraph(0, 5, 100, 100);  // 0 points, irrelevant number of additional edges
     printPoints(graph.getPoints());
@@ -192,7 +192,7 @@ TEST_F(TrafficGraphTest, InitializePoints) {
 TEST_F(TrafficGraphTest, FindShortestPath) {
     Route* shortestRoute = graph.findShortestPath(&points[0], &points[3]);
 
-    std::cerr << "////////// Test Case 6: Shortest Path Unique //////////\n";
+    // std::cerr << "////////// Test Case 6: Shortest Path Unique //////////\n";
 
     ASSERT_NE(shortestRoute, nullptr);
     ASSERT_EQ(shortestRoute->pathLen, 3);
@@ -216,7 +216,7 @@ TEST_F(TrafficGraphTest, FindShortestPath) {
     graph = TrafficGraph(&points, &edges);
     shortestRoute = graph.findShortestPath(&points[0], &points[2]);
 
-    std::cerr << "////////// Test Case 6: Shortest Path PathLen Greater //////////\n";
+    // std::cerr << "////////// Test Case 6: Shortest Path PathLen Greater //////////\n";
 
     ASSERT_NE(shortestRoute, nullptr);
     ASSERT_EQ(shortestRoute->pathLen, 2);
@@ -228,7 +228,7 @@ TEST_F(TrafficGraphTest, FindShortestPath) {
 }
 
 TEST_F(TrafficGraphTest, FindAllPathsStart ) {
-    std::cerr << "////////// Test: FindAllPathsStart //////////\n";
+    // std::cerr << "////////// Test: FindAllPathsStart //////////\n";
     std::vector<Route> allPaths = graph.findAllPaths(&points[0], &points[3]);
     ASSERT_EQ(allPaths.size(), 2);
     allPaths = graph.findAllPaths(&points[0], &points[2]);
@@ -239,7 +239,7 @@ TEST_F(TrafficGraphTest, FindAllPathsStart ) {
 
 
 TEST_F(TrafficGraphTest, FindAllPathsMediumGraph) {
-    std::cerr << "////////// Test: FindAllPathsMediumGraph //////////\n";
+    // std::cerr << "////////// Test: FindAllPathsMediumGraph //////////\n";
     graph.initializeGraph(5, 3, 100, 100);  // Five points, a few additional edges
     
     auto startPoint = &graph.getPoints()->front();
@@ -251,7 +251,7 @@ TEST_F(TrafficGraphTest, FindAllPathsMediumGraph) {
 }
 
 TEST_F(TrafficGraphTest, FindAllPathsLinearGraph) {
-    std::cerr << "////////// Test: FindAllPathsLinearGraph //////////\n";
+    // std::cerr << "////////// Test: FindAllPathsLinearGraph //////////\n";
     SetUpLinearGraph(); 
 
     std::vector<Route> allPathsABCD = graph.findAllPaths(&points[0], &points[3]);
@@ -262,14 +262,14 @@ TEST_F(TrafficGraphTest, FindAllPathsLinearGraph) {
 }
 
 TEST_F(TrafficGraphTest, FindAllPathsLoopGraph) {
-    std::cerr << "////////// Test: FindAllPathsLoopGraph //////////\n";
+    // std::cerr << "////////// Test: FindAllPathsLoopGraph //////////\n";
     SetUpLoopGraph();
     std::vector<Route> allPathsABDA = graph.findAllPaths(&points[0], &points[3]);
     ASSERT_EQ(allPathsABDA.size(), 2); 
 }
 
 TEST_F(TrafficGraphTest, FindAllPathsIsolatedPoints) {
-    std::cerr << "////////// Test: FindAllPathsIsolatedPoints //////////\n";
+    // std::cerr << "////////// Test: FindAllPathsIsolatedPoints //////////\n";
     SetUpIsolatedPointsGraph();
 
     std::vector<Route> allPathsCD = graph.findAllPaths(&points[2], &points[3]);
@@ -286,8 +286,24 @@ TEST_F(TrafficGraphTest, FindAlternativePathsWithNoAlternatives) {
     Point* destination = &points.back();
 
     std::vector<Route> alternativeRoutes = graph.findAlternativePaths(source, destination);
-
     ASSERT_TRUE(alternativeRoutes.empty());
+}
+
+TEST_F(TrafficGraphTest, FindAlternativePathsLoop) {
+    SetUpLoopGraph();
+    Point* source = &points[0];
+    Point* destination = &points.back();
+    std::vector<Route> alternativeRoutes = graph.findAlternativePaths(source, destination);
+    std::cerr << "Alternative routes: " << alternativeRoutes.size() << std::endl;
+    // printEdges(&edges);
+    ASSERT_EQ(alternativeRoutes[0].route[0].start, edges[0].start);
+    ASSERT_EQ(alternativeRoutes[0].route[0].end, edges[0].end);
+    ASSERT_EQ(alternativeRoutes[0].route[1].start, edges[1].start);
+    ASSERT_EQ(alternativeRoutes[0].route[1].end, edges[1].end);
+    ASSERT_EQ(alternativeRoutes[0].route[2].start, edges[2].start);
+    ASSERT_EQ(alternativeRoutes[0].route[2].end, edges[2].end);
+
+    ASSERT_EQ(alternativeRoutes.size(), 1);
 }
 
 // // Tests for initializeCars method
