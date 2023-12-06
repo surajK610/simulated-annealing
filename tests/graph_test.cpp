@@ -48,6 +48,22 @@ public:
         }
     }
 
+    void printRoute(const Route& route) {
+        std::cerr << "Route length: " << route.pathLen << "\n";
+        for (int i = 0; i < route.pathLen; ++i) {
+            const auto& edge = route.route[i];
+            std::cerr << "Edge " << i << ": (" << edge.start->x << ", " << edge.start->y << ") to ("
+                      << edge.end->x << ", " << edge.end->y << "), Dist: " << edge.distance << "\n";
+        }
+    }
+
+    void printAllPaths(const std::vector<Route>& paths) {
+        std::cerr << "Total paths found: " << paths.size() << "\n";
+        for (const auto& path : paths) {
+            printRoute(path);
+        }
+    }
+
 };
 
 TEST_F(TrafficGraphTest, FindShortestPath) {
@@ -89,7 +105,7 @@ TEST_F(TrafficGraphTest, InitializePoints) {
     ////////////////////////////////////////////
     // Test Case 1: Initialize graph with a small number of points and edges
     std::cerr << "    ////////////////////////////////////////////" << std::endl;
-    std::cerr << "Test Case 1: Small number of points and edges" << std::endl;
+    std::cerr << "    Test Case 1: Small number of points and edges" << std::endl;
     std::cerr << "    ////////////////////////////////////////////" << std::endl;
 
     graph.initializeGraph(5, 3, 50, 50);  // 5 points, 3 additional edges
@@ -101,7 +117,7 @@ TEST_F(TrafficGraphTest, InitializePoints) {
 
     // Test Case 2: Initialize graph with no additional edges
     std::cerr << "    ////////////////////////////////////////////" << std::endl;
-    std::cerr << "\nTest Case 2: No additional edges" << std::endl;
+    std::cerr << "    \nTest Case 2: No additional edges" << std::endl;
     std::cerr << "    ////////////////////////////////////////////" << std::endl;
 
     graph.initializeGraph(4, 0, 30, 30);  // 4 points, no additional edges
@@ -144,8 +160,80 @@ TEST_F(TrafficGraphTest, InitializePoints) {
     ASSERT_TRUE(graph.getEdges().empty());
 }
 
+TEST_F(TrafficGraphTest, FindAllPathsStart ) {
+    std::cerr << "////////// Test: START //////////\n";
+}
+
+
+TEST_F(TrafficGraphTest, FindAllPaths_MediumGraph) {
+    std::cerr << "////////// Test: FindAllPaths_MediumGraph //////////\n";
+    // Define a medium complexity graph
+    // Initialize the graph with predefined points and edges
+    // Call findAllPaths and print the selected start and endpoint using cerr
+
+    // Example
+    graph.initializeGraph(5, 3, 100, 100);  // Five points, a few additional edges
+    
+    auto startPoint = &graph.getPoints().front();
+    auto endPoint = &graph.getPoints().back();
+    
+    std::cerr << "Selected Start Point: (" << startPoint->x << "," << startPoint->y << ")\n";
+    std::cerr << "Selected End Point: (" << endPoint->x << "," << endPoint->y << ")\n";
+
+    auto paths = graph.findAllPaths(startPoint, endPoint);
+    EXPECT_GT(paths.size(), 0);
+    std::cerr << "Paths found: " << paths.size() << "\n";
+    printAllPaths(paths);
+}
 
 TEST_F(TrafficGraphTest, FindAllPaths) {
     auto paths = graph.findAllPaths(&points.front(), &points.back());
     EXPECT_GT(paths.size(), 0);
+}
+
+
+TEST_F(TrafficGraphTest, FindAllPaths_ComplexGraph) {
+    std::cerr << "////////// Test: FindAllPaths_ComplexGraph //////////\n";
+    // Define a complex graph
+    // Initialize the graph with predefined points and edges
+    // Call findAllPaths and print the selected start and endpoint using cerr
+
+    // Example
+    std::cerr.setstate(std::ios_base::failbit);
+    graph.initializeGraph(10, 5, 100, 100);  // Ten points, several additional edges
+    std::cerr.clear();
+
+    auto startPoint = &graph.getPoints().front();
+    auto endPoint = &graph.getPoints().back();
+    
+    std::cerr << "Selected Start Point: (" << startPoint->x << "," << startPoint->y << ")\n";
+    std::cerr << "Selected End Point: (" << endPoint->x << "," << endPoint->y << ")\n";
+
+    auto paths = graph.findAllPaths(startPoint, endPoint);
+    EXPECT_GT(paths.size(), 0);
+    std::cerr << "Paths found: " << paths.size() << "\n";
+    printAllPaths(paths);
+}
+
+TEST_F(TrafficGraphTest, FindAllPaths_RandomGraph) {
+    std::cerr << "////////// Test: FindAllPaths_RandomGraph //////////\n";
+    // Generate a random graph
+    // Initialize the graph with random points and edges
+    // Call findAllPaths and print the selected start and endpoint using cerr
+
+    // Example
+    std::cerr.setstate(std::ios_base::failbit);
+    graph.initializeGraph(20, 10, 1000, 1000);  // Larger, randomly generated graph
+    std::cerr.clear();
+
+    auto startPoint = &graph.getPoints().front();
+    auto endPoint = &graph.getPoints().back();
+    
+    std::cerr << "Selected Start Point: (" << startPoint->x << "," << startPoint->y << ")\n";
+    std::cerr << "Selected End Point: (" << endPoint->x << "," << endPoint->y << ")\n";
+
+    auto paths = graph.findAllPaths(startPoint, endPoint);
+    EXPECT_GT(paths.size(), 0);
+    std::cerr << "Paths found: " << paths.size() << "\n";
+    printAllPaths(paths);
 }

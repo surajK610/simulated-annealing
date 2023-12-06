@@ -56,6 +56,7 @@ void TrafficGraph::addClosestEdges(std::set<Edge>& mstEdges) {
     }
 
     std::cerr << "Adding the Additional Edges To The Edge List (ClostestEdgeFunction)...\n";
+    std::cerr << "Adding" << numEdgesToAdd << " edges to the edge list.\n";
 
     // Log the edges that were added
     for (size_t i = 0; i < numEdgesToAdd; ++i) {
@@ -64,6 +65,67 @@ void TrafficGraph::addClosestEdges(std::set<Edge>& mstEdges) {
                   << ") and (" << addedEdge.end->x << "," << addedEdge.end->y << ") with distance "
                   << addedEdge.distance << ".\n";
     }
+}
+
+
+void TrafficGraph::add_random_edges(const std::set<Edge>& mstEdges, unsigned int additionalEdges) {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(0, points.size() - 1);
+
+    unsigned int addedEdges = 0, numTries = 0;
+    const double MIN_DISTANCE_THRESHOLD = 30.0;  // Adjust this threshold as needed
+    const unsigned int MAX_TRIES = 200;
+
+    std::cerr << "Starting to add random edges...\n";
+    while (addedEdges < additionalEdges) {
+        if (numTries >= MAX_TRIES) {
+            std::cerr << "Exceeded maximum number of tries, stopping...\n";
+            break;
+        }
+
+        int idx1 = dis(gen);
+        int idx2 = dis(gen);
+
+        //std::cerr << "Random indices selected: idx1 = " << idx1 << ", idx2 = " << idx2 << "\n";
+
+        // Ensure we don't select the same point
+        if (idx1 == idx2) {
+            numTries++;
+            //std::cerr << "Selected the same point for both ends of edge, retrying...\n";
+            continue;
+        }
+
+        Point* start = &points[idx1];
+        Point* end = &points[idx2];
+        double distance = calculateDistance(*start, *end);
+
+        //std::cerr << "Calculated distance: " << distance << "\n";
+
+        if (distance > MIN_DISTANCE_THRESHOLD) {
+            //std::cerr << "Distance below threshold, skipping this pair...\n";
+            numTries++;
+            continue;
+        }
+
+        // Check if this edge already exists in mstEdges
+        Edge newEdge = {start, end, distance};
+        auto it = std::find_if(mstEdges.begin(), mstEdges.end(), [&newEdge](const Edge& e) {
+            return (*e.start == *newEdge.start && *e.end == *newEdge.end) || (*e.start == *newEdge.end && *e.end == *newEdge.start);
+        });
+
+        if (it == mstEdges.end()) {
+            // Edge not in mstEdges, so add it
+            addEdge(start, end);
+            std::cerr << "Random edge added between (" << start->x << "," << start->y << ") and (" << end->x << "," << end->y << ") with distance " << distance << ".\n";
+            ++addedEdges;
+        } else {
+            numTries++;
+            std::cerr << "Edge already exists in MST, skipping...\n";
+        }
+    }
+
+    std::cerr << "Finished adding random edges. Total added: " << addedEdges << "\n";
 }
 
 
@@ -140,17 +202,17 @@ void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int addition
         }
     }
 
-    std::cout << "Prim's algorithm completed. MST formed.\n";
+    std::cerr << "Prim's algorithm completed. MST formed.\n";
 
-    addClosestEdges(mstEdges);
-    std::cout << "Additional edges added.\n";
+    add_random_edges(mstEdges, additionalEdges);
+    std::cerr << "Additional edges added.\n";
 
     // Add each edge from mstEdges to the edges list
     for (const auto& edge : mstEdges) {
         addEdge(edge.start, edge.end);
     }
 
-    std::cout << "Additional edges added.\n";
+    std::cerr << "Additional edges added.\n";
 }
 
 void TrafficGraph::addPoint(const Point& point) {
@@ -162,42 +224,90 @@ void TrafficGraph::addEdge(Point* start, Point* end) {
     edges.push_back(Edge{start, end, distance});
 }
 
-void  TrafficGraph::findAllPathsUtil(Point* current, Point* destination, std::vector<Edge>& path, std::vector<Route>& allPaths, std::unordered_set<Point*>& visited) {
-    if (current == destination) {
+void TrafficGraph::findAllPathsUtil(Point* current, Point* destination, std::vector<Edge>& path, std::vector<Route>& allPaths, std::unordered_set<Point*>& visited) {
+    std::cerr << "Visiting Point: (" << current->x << ", " << current->y << ")\n";
+
+    if (*current == *destination) {
         Route route;
         route.pathLen = path.size();
         for (size_t i = 0; i < path.size(); ++i) {
             route.route[i] = path[i];
         }
         allPaths.push_back(route);
+
+        std::cerr << "Found a path to destination. Path length: " << route.pathLen << "\n";
         return;
     }
 
     visited.insert(current);
 
     for (auto& edge : edges) {
-        if (edge.start == current && visited.find(edge.end) == visited.end()) {
+        Point* nextPoint = (edge.start == current) ? edge.end : (edge.end == current ? edge.start : nullptr);
+
+        if (nextPoint && visited.find(nextPoint) == visited.end()) {
             path.push_back(edge);
-            findAllPathsUtil(edge.end, destination, path, allPaths, visited);
+            std::cerr << "Traversing edge from (" << edge.start->x << ", " << edge.start->y << ") to (" << edge.end->x << ", " << edge.end->y << ")\n";
+            
+            findAllPathsUtil(nextPoint, destination, path, allPaths, visited);
+            
             path.pop_back();
-        } else if (edge.end == current && visited.find(edge.start) == visited.end()) {
-            path.push_back(edge);
-            findAllPathsUtil(edge.start, destination, path, allPaths, visited);
-            path.pop_back();
+            std::cerr << "Backtracking from (" << edge.end->x << ", " << edge.end->y << ") to (" << edge.start->x << ", " << edge.start->y << ")\n";
         }
     }
 
     visited.erase(current);
+    std::cerr << "Exiting Point: (" << current->x << ", " << current->y << ")\n";
 }
 
-std::vector<Route>  TrafficGraph::findAllPaths(Point* source, Point* destination) {
-        std::vector<Route> allPaths;
-        std::vector<Edge> path;
-        std::unordered_set<Point*> visited;
+std::vector<Route> TrafficGraph::findAllPaths(Point* source, Point* destination) {
+    std::cerr << "Finding all paths from (" << source->x << ", " << source->y << ") to (" << destination->x << ", " << destination->y << ")\n";
 
-        findAllPathsUtil(source, destination, path, allPaths, visited);
-        return allPaths;
+    std::vector<Route> allPaths;
+    std::vector<Edge> path;
+    std::unordered_set<Point*> visited;
+
+    findAllPathsUtil(source, destination, path, allPaths, visited);
+
+    std::cerr << "Total paths found: " << allPaths.size() << "\n";
+    return allPaths;
 }
+
+// void  TrafficGraph::findAllPathsUtil(Point* current, Point* destination, std::vector<Edge>& path, std::vector<Route>& allPaths, std::unordered_set<Point*>& visited) {
+//     if (current == destination) {
+//         Route route;
+//         route.pathLen = path.size();
+//         for (size_t i = 0; i < path.size(); ++i) {
+//             route.route[i] = path[i];
+//         }
+//         allPaths.push_back(route);
+//         return;
+//     }
+
+//     visited.insert(current);
+
+//     for (auto& edge : edges) {
+//         if (edge.start == current && visited.find(edge.end) == visited.end()) {
+//             path.push_back(edge);
+//             findAllPathsUtil(edge.end, destination, path, allPaths, visited);
+//             path.pop_back();
+//         } else if (edge.end == current && visited.find(edge.start) == visited.end()) {
+//             path.push_back(edge);
+//             findAllPathsUtil(edge.start, destination, path, allPaths, visited);
+//             path.pop_back();
+//         }
+//     }
+
+//     visited.erase(current);
+// }
+
+// std::vector<Route>  TrafficGraph::findAllPaths(Point* source, Point* destination) {
+//         std::vector<Route> allPaths;
+//         std::vector<Edge> path;
+//         std::unordered_set<Point*> visited;
+
+//         findAllPathsUtil(source, destination, path, allPaths, visited);
+//         return allPaths;
+// }
 
 double jaccardSimilarity(Route& route1, Route& route2) {
         std::unordered_set<Edge*> edgesInRoute1;
