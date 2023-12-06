@@ -232,12 +232,23 @@ Route* TrafficGraph::findShortestPath(Point* source, Point* destination) {
         queue.pop();
 
         if (current == destination) {
+            std::cerr << "Found shortest path from (" << source->x << "," << source->y << ") to (" << destination->x << "," << destination->y << ") with distance " << distances[current] << ".\n";
             return reconstructRoute(source, destination, previous);
         }
+        std::cerr << "Made here\n";
 
         for (auto& edge : edges) {
             if (edge.start == current) {
                 Point* neighbor = edge.end;
+                double newDist = distances[current] + edge.distance;
+                if (newDist < distances[neighbor]) {
+                    distances[neighbor] = newDist;
+                    previous[neighbor] = &edge;
+                    queue.push(neighbor);
+                }
+            }
+            else if (edge.end == current) {
+                Point* neighbor = edge.start;
                 double newDist = distances[current] + edge.distance;
                 if (newDist < distances[neighbor]) {
                     distances[neighbor] = newDist;
@@ -251,7 +262,6 @@ Route* TrafficGraph::findShortestPath(Point* source, Point* destination) {
     // Destination is not reachable
     return nullptr;
 }
-
 
 std::vector<Route> TrafficGraph::findAlternativePaths(Point* source, Point* destination) {
     Route* shortestRoute = findShortestPath(source, destination);
