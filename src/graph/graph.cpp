@@ -264,26 +264,29 @@ std::vector<Route>  TrafficGraph::findAllPaths(Point* source, Point* destination
 }
 
 double jaccardSimilarity(Route& route1, Route& route2) {
-        std::unordered_set<Edge*> edgesInRoute1;
-        std::unordered_set<Edge*> edgesInRoute2;
+    std::unordered_set<Edge, EdgeHash> edgesInRoute1;
+    std::unordered_set<Edge, EdgeHash> edgesInRoute2;
+    
+    for (int i = 0; i < route1.pathLen; ++i) {
+        edgesInRoute1.insert(route1.route[i]);
+        // ... Debug print statements
+    }
+    
+    for (int i = 0; i < route2.pathLen; ++i) {
+        edgesInRoute2.insert(route2.route[i]);
+        // ... Debug print statements
+    }
 
-        for (int i = 0; i < route1.pathLen; ++i) {
-            edgesInRoute1.insert(&route1.route[i]);
+    int intersectionSize = 0;
+    for (const auto& edge : edgesInRoute1) {
+        if (edgesInRoute2.find(edge) != edgesInRoute2.end()) {
+            intersectionSize++;
         }
-        
-        for (int i = 0; i < route2.pathLen; ++i) {
-            edgesInRoute2.insert(&route2.route[i]);
-        }
+    }
 
-        int intersectionSize = 0;
-        for (auto edge : edgesInRoute1) {
-            if (edgesInRoute2.find(edge) != edgesInRoute2.end()) {
-                intersectionSize++;
-            }
-        }
-
-        int unionSize = edgesInRoute1.size() + edgesInRoute2.size() - intersectionSize;
-        return static_cast<double>(intersectionSize) / unionSize;
+    int unionSize = edgesInRoute1.size() + edgesInRoute2.size() - intersectionSize;
+    std::cerr << "Intersection size: " << intersectionSize << ", Union size: " << unionSize << "\n";
+    return static_cast<double>(intersectionSize) / unionSize;
 }
 
 Route* reconstructRoute(Point* source, Point* destination, std::unordered_map<Point*, Edge*>& previous) {
@@ -406,9 +409,9 @@ std::vector<Route> TrafficGraph::findAlternativePaths(Point* source, Point* dest
     for (auto& route : allRoutes) {
         double similarity = jaccardSimilarity(*shortestRoute, route);
         similarityScores.push_back(std::make_pair(similarity, route));
-        // std::cerr << "Route: " << std::endl;
-        // printRoute(route);
-        // std::cerr << "Similarity: " << similarity << std::endl;
+        std::cerr << "Route: " << std::endl;
+        printRoute(route);
+        std::cerr << "Similarity: " << similarity << std::endl;
     }
 
     std::sort(similarityScores.begin(), similarityScores.end(), [](const std::pair<double, Route>& a, const std::pair<double, Route>& b) {
@@ -419,6 +422,9 @@ std::vector<Route> TrafficGraph::findAlternativePaths(Point* source, Point* dest
     Route* firstAlternativeRoute = nullptr;
 
     for (auto& scorePair : similarityScores) {
+        if (scorePair.first == 1) {
+            continue;
+        }
         // std::cerr << "Similarity: " << scorePair.first << std::endl;
         if (scorePair.first !=  0 || shortestRoute->pathLen != scorePair.second.pathLen) {
             if (!firstAlternativeRoute) {
@@ -556,6 +562,8 @@ void TrafficGraph::initializeCars(std::vector<Car>& cars, unsigned int numCars, 
         do {
             src = getRandomPoint();
             dest = getRandomPoint();
+            std::cerr << "Random points selected: (" << src->x << ", " << src->y << ") and (" << dest->x << ", " << dest->y << ").\n";
+            
         } while (!isDistanceSufficient(*src, *dest, minDistanceThreshold));
 
         car.source = src;

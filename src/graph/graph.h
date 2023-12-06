@@ -27,6 +27,19 @@ struct Edge {
     bool operator<(const Edge& other) const {
         return distance < other.distance;
     }
+     bool operator==(const Edge& other) const {
+        return ((start == other.start && end == other.end) || (start == other.end && end == other.start) && (distance == other.distance));
+    }
+};
+
+struct EdgeHash {
+    size_t operator()(const Edge& edge) const {
+        size_t h1 = std::hash<Point*>()(edge.start);
+        size_t h2 = std::hash<Point*>()(edge.end);
+        size_t h3 = std::hash<double>()(edge.distance);
+
+        return h1 ^ h2 ^ h3;
+    }
 };
 
 struct Route {

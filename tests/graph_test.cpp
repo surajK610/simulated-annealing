@@ -75,6 +75,24 @@ public:
         graph = TrafficGraph(&points, &edges);
     }
 
+    void SetUpRepeatEdgeGraph() {
+        points.clear();
+        edges.clear();
+
+        points.push_back({0, 0}); 
+        points.push_back({1, 0}); 
+
+        Edge edge1 = {&points[0], &points[1], 1.0};
+        Edge edge2 = {&points[0], &points[1], 2.0};
+        Edge edge3 = {&points[0], &points[1], 3.0};
+
+        edges.push_back(edge1);
+        edges.push_back(edge2);
+        edges.push_back(edge3);
+
+        graph = TrafficGraph(&points, &edges);
+    }
+
     void SetUpIsolatedPointsGraph() {
         points.clear();
         edges.clear();
@@ -295,32 +313,30 @@ TEST_F(TrafficGraphTest, FindAlternativePathsLoop) {
     Point* destination = &points.back();
     std::vector<Route> alternativeRoutes = graph.findAlternativePaths(source, destination);
     std::cerr << "Alternative routes: " << alternativeRoutes.size() << std::endl;
-    // printEdges(&edges);
     ASSERT_EQ(alternativeRoutes[0].route[0].start, edges[0].start);
     ASSERT_EQ(alternativeRoutes[0].route[0].end, edges[0].end);
     ASSERT_EQ(alternativeRoutes[0].route[1].start, edges[1].start);
     ASSERT_EQ(alternativeRoutes[0].route[1].end, edges[1].end);
     ASSERT_EQ(alternativeRoutes[0].route[2].start, edges[2].start);
     ASSERT_EQ(alternativeRoutes[0].route[2].end, edges[2].end);
-
     ASSERT_EQ(alternativeRoutes.size(), 1);
 }
 
-// // Tests for initializeCars method
-// TEST_F(TrafficGraphTest, InitializeCars) {
-//     unsigned int numCars = 5;
-//     double minDistanceThreshold = 10.0;
-//     std::vector<Car> cars;
+// Tests for initializeCars method
+TEST_F(TrafficGraphTest, InitializeCars) {
+    unsigned int numCars = 5;
+    double minDistanceThreshold = 10.0;
+    std::vector<Car> cars;
 
-//     graph.initializeCars(cars, numCars, minDistanceThreshold);
-//     ASSERT_EQ(cars.size(), numCars);
+    graph.initializeCars(cars, numCars, minDistanceThreshold);
+    ASSERT_EQ(cars.size(), numCars);
 
-//     for (size_t i = 0; i < cars.size(); ++i) {
-//         ASSERT_NE(cars[i].source, nullptr);
-//         ASSERT_NE(cars[i].destination, nullptr);
-//         ASSERT_TRUE(graph.isDistanceSufficient(*cars[i].source, *cars[i].destination, minDistanceThreshold));
-//     }
-// }
+    for (size_t i = 0; i < cars.size(); ++i) {
+        ASSERT_NE(cars[i].source, nullptr);
+        ASSERT_NE(cars[i].destination, nullptr);
+        ASSERT_TRUE(graph.isDistanceSufficient(*cars[i].source, *cars[i].destination, minDistanceThreshold));
+    }
+}
 
 // // Tests for setCarRoute method
 // TEST_F(TrafficGraphTest, SetCarRoute) {
