@@ -46,8 +46,8 @@ struct Car {
 class TrafficGraph {
   
 private:
-    std::vector<Point> points;
-    std::vector<Edge> edges;
+    std::vector<Point>* points;
+    std::vector<Edge>* edges;
 
     double calculateDistance(const Point& a, const Point& b);
     void addClosestEdges(std::set<Edge>& mstEdges);
@@ -56,8 +56,8 @@ private:
     void findAllPathsUtil(Point* current, Point* destination, std::vector<Edge>& path, std::vector<Route>& allPaths, std::unordered_set<Point*>& visited);
 
 public:
-    TrafficGraph() {}
-    TrafficGraph(std::vector<Point>& initPoints, std::vector<Edge>& initEdges)
+    TrafficGraph() : points(nullptr), edges(nullptr) {}
+    TrafficGraph(std::vector<Point>* initPoints, std::vector<Edge>* initEdges)
         : points(initPoints), edges(initEdges) {}
     void add_random_edges(const std::set<Edge>& mstEdges, unsigned int additionalEdges);
     void initializePoints(unsigned int numPoints, unsigned int xBound, unsigned int yBound); // new method declaration
@@ -66,8 +66,8 @@ public:
     std::vector<Route> findAlternativePaths(Point* source, Point* destination);
     
     Route* findShortestPath(Point* source, Point* destination);
-    std::vector<Point> getPoints() { return points; }
-    std::vector<Edge> getEdges() { return edges; }
+    std::vector<Point> getPoints() { return *points; }
+    std::vector<Edge> getEdges() { return *edges; }
 };
 
 #endif
