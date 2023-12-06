@@ -88,7 +88,7 @@ TEST_F(TrafficGraphTest, InitializePoints) {
 
     // Test Case 2: Initialize graph with no additional edges
     std::cerr << "    ////////////////////////////////////////////" << std::endl;
-    std::cerr << "\nTest Case 2: No additional edges" << std::endl;
+    std::cerr << "Test Case 2: No additional edges" << std::endl;
     std::cerr << "    ////////////////////////////////////////////" << std::endl;
 
     graph.initializeGraph(4, 0, 30, 30);  // 4 points, no additional edges
@@ -100,7 +100,7 @@ TEST_F(TrafficGraphTest, InitializePoints) {
 
     // Test Case 3: Large graph
     std::cerr << "    ////////////////////////////////////////////" << std::endl;
-    std::cerr << "\nTest Case 3: Large graph" << std::endl;
+    std::cerr << "Test Case 3: Large graph" << std::endl;
     std::cerr << "    ////////////////////////////////////////////" << std::endl;
     graph.initializeGraph(20, 10, 100, 100);  // 20 points, 10 additional edges
     // printPoints(graph.getPoints());
@@ -110,7 +110,7 @@ TEST_F(TrafficGraphTest, InitializePoints) {
     ASSERT_FALSE(graph.getEdges().empty());
 
     // Test Case 4: Edge case with only 1 point (no edges should be formed)
-    std::cerr << "\nTest Case 4: Single point" << std::endl;
+    std::cerr << "Test Case 4: Single point" << std::endl;
     graph.initializeGraph(1, 5, 100, 100);  // 1 point, request for additional edges
     // printPoints(graph.getPoints());
     // printEdges(graph.getEdges());
@@ -120,37 +120,65 @@ TEST_F(TrafficGraphTest, InitializePoints) {
 
     // Test Case 5: Edge case with zero points
     std::cerr << "    ////////////////////////////////////////////" << std::endl;
-    std::cerr << "\nTest Case 5: Zero points" << std::endl;
+    std::cerr << "Test Case 5: Zero points" << std::endl;
     std::cerr << "    ////////////////////////////////////////////" << std::endl;
 
     graph.initializeGraph(0, 5, 100, 100);  // 0 points, irrelevant number of additional edges
-    // printPoints(graph.getPoints());
-    // printEdges(graph.getEdges());
+    printPoints(graph.getPoints());
+    printEdges(graph.getEdges());
+    std::cerr << "Edges: " << graph.getEdges().size() << std::endl;
 
-    ASSERT_TRUE(graph.getPoints().empty());
-    ASSERT_TRUE(graph.getEdges().empty());
+    ASSERT_EQ(graph.getPoints().size(), 0);
+    ASSERT_EQ(graph.getEdges().size(), 0);
 }
 
 TEST_F(TrafficGraphTest, FindShortestPath) {
     points.push_back({0, 0});
     points.push_back({1, 1});
-    points.push_back({2, 2}); 
+    points.push_back({2, 2});
+    points.push_back({3, 3}); 
+
 
     Edge edge1 = {&points[0], &points[1], 1.0};
     Edge edge2 = {&points[1], &points[2], 2.0};
-    // Edge edge3 = {&points[0], &points[2], 3.0};
+    Edge edge3 = {&points[2], &points[3], 2.0};
 
     edges.push_back(edge1);
     edges.push_back(edge2);
-    // edges.push_back(edge3);
+    edges.push_back(edge3);
 
     graph = TrafficGraph(&points, &edges);
-    printPoints(points); 
-    printEdges(edges);
+    Route* shortestRoute = graph.findShortestPath(&points[0], &points[3]);
 
-    printPoints(graph.getPoints()); 
-    printEdges(graph.getEdges()); 
-    Route* shortestRoute = graph.findShortestPath(&points[0], &points[2]);
+    std::cerr << "    ////////////////////////////////////////////" << std::endl;
+    std::cerr << "Test Case 6: Shortest Path Unique" << std::endl;
+    std::cerr << "    ////////////////////////////////////////////" << std::endl;
+
+    ASSERT_NE(shortestRoute, nullptr);
+    ASSERT_EQ(shortestRoute->pathLen, 3);
+    EXPECT_EQ(shortestRoute->route[0].start, &points[0]);
+    EXPECT_EQ(shortestRoute->route[0].end, &points[1]);
+    EXPECT_EQ(shortestRoute->route[1].start, &points[1]);
+    EXPECT_EQ(shortestRoute->route[1].end, &points[2]);
+    EXPECT_EQ(shortestRoute->route[2].start, &points[2]);
+    EXPECT_EQ(shortestRoute->route[2].end, &points[3]);
+    delete shortestRoute;
+
+    edges.clear();
+    edge1 = {&points[0], &points[1], 1.0};
+    edge2 = {&points[1], &points[2], 2.0};
+    edge3 = {&points[0], &points[2], 4.0};
+
+    edges.push_back(edge1);
+    edges.push_back(edge2);
+    edges.push_back(edge3);
+
+    graph = TrafficGraph(&points, &edges);
+    shortestRoute = graph.findShortestPath(&points[0], &points[2]);
+
+    std::cerr << "    ////////////////////////////////////////////" << std::endl;
+    std::cerr << "Test Case 6: Shortest Path PathLen Greater" << std::endl;
+    std::cerr << "    ////////////////////////////////////////////" << std::endl;
 
     ASSERT_NE(shortestRoute, nullptr);
     ASSERT_EQ(shortestRoute->pathLen, 2);
@@ -158,7 +186,6 @@ TEST_F(TrafficGraphTest, FindShortestPath) {
     EXPECT_EQ(shortestRoute->route[0].end, &points[1]);
     EXPECT_EQ(shortestRoute->route[1].start, &points[1]);
     EXPECT_EQ(shortestRoute->route[1].end, &points[2]);
-
     delete shortestRoute;
 }
 

@@ -241,31 +241,31 @@ Route* reconstructRoute(Point* source, Point* destination, std::unordered_map<Po
 Route* TrafficGraph::findShortestPath(Point* source, Point* destination) {
     std::unordered_map<Point*, double> distances;
     std::unordered_map<Point*, Edge*> previous;
-    std::cerr << "Source" << source << " " << source->x << " " << source->y << std::endl;
-    std::cerr << "Destination" << destination << " " << destination->x << " " << destination->y << std::endl;
+    // std::cerr << "Source" << source << " " << source->x << " " << source->y << std::endl;
+    // std::cerr << "Destination" << destination << " " << destination->x << " " << destination->y << std::endl;
 
     for (auto& point : *points) {
         distances[&point] = std::numeric_limits<double>::infinity();
-        std::cerr << &point << " " << point.x << " " << point.y << std::endl;
+        // std::cerr << &point << " " << point.x << " " << point.y << std::endl;
     }
     
     auto cmp = [&distances](Point* left, Point* right) { return distances[left] > distances[right]; };
     std::priority_queue<Point*, std::vector<Point*>, decltype(cmp)> queue(cmp);
 
-    std::cerr << "Source" << source << " " << source->x << " " << source->y << std::endl;
+    // std::cerr << "Source" << source << " " << source->x << " " << source->y << std::endl;
     distances[source] = 0;
     queue.push(source);
-    std::cerr << "Made here1\n";
+    // std::cerr << "Made here1\n";
     while (!queue.empty()) {
         Point* current = queue.top();
         queue.pop();
-        std::cerr << current->x << " " << current->y << std::endl;
+        // std::cerr << current->x << " " << current->y << std::endl;
 
         if (current == destination) {
-            std::cerr << "Found shortest path from (" << source->x << "," << source->y << ") to (" << destination->x << "," << destination->y << ") with distance " << distances[current] << ".\n";
+            // std::cerr << "Found shortest path from (" << source->x << "," << source->y << ") to (" << destination->x << "," << destination->y << ") with distance " << distances[current] << ".\n";
             return reconstructRoute(source, destination, previous);
         }
-        std::cerr << "Made here\n";
+        // std::cerr << "Made here\n";
 
         for (auto& edge : *edges) {
             Point* neighbor = nullptr;
@@ -276,15 +276,15 @@ Route* TrafficGraph::findShortestPath(Point* source, Point* destination) {
             }
 
             if (neighbor) {
-                std::cerr << "Neighbor: " << neighbor << " " << neighbor->x << " " << neighbor->y << "\n";
+                // std::cerr << "Neighbor: " << neighbor << " " << neighbor->x << " " << neighbor->y << "\n";
                 double newDist = distances[current] + edge.distance;
-                std::cerr << "New distance: " << newDist << "\n";
+                // std::cerr << "New distance: " << newDist << "\n";
 
                 if (newDist < distances[neighbor]) {
                     distances[neighbor] = newDist;
                     previous[neighbor] = &edge;
                     queue.push(neighbor);
-                    std::cerr << "Queue size: " << queue.size() << "\n";
+                    // std::cerr << "Queue size: " << queue.size() << "\n";
                 }
             }
         }
