@@ -3,9 +3,9 @@
 #include "gtest/gtest.h"
 #include "../src/graph/graph.h"
 
-class TrafficGraphTest : public ::testing::Test {
+class TrafficGraphInitTest : public ::testing::Test {
 protected:
-    TrafficGraph graph;
+    TrafficGraphInitTest graph;
 
     void SetUp() override {
         // Setup code (if needed)
@@ -16,7 +16,7 @@ protected:
     }
 };
 
-TEST_F(TrafficGraphTest, InitializePoints_WithValidBounds) {
+TEST_F(TrafficGraphInitTest, InitializePoints_WithValidBounds) {
     unsigned int numPoints = 10;
     unsigned int xBound = 100;
     unsigned int yBound = 100;
@@ -30,12 +30,12 @@ TEST_F(TrafficGraphTest, InitializePoints_WithValidBounds) {
     }
 }
 
-TEST_F(TrafficGraphTest, InitializePoints_WithZeroBounds) {
+TEST_F(TrafficGraphInitTest, InitializePoints_WithZeroBounds) {
     graph.initializePoints(10, 0, 0);
     ASSERT_TRUE(graph.points.empty()); // Expect no points to be initialized
 }
 
-TEST_F(TrafficGraphTest, InitializeGraph_WithValidParameters) {
+TEST_F(TrafficGraphInitTest, InitializeGraph_WithValidParameters) {
     unsigned int numPoints = 10;
     unsigned int additionalEdges = 5;
     unsigned int xBound = 100;
@@ -46,7 +46,7 @@ TEST_F(TrafficGraphTest, InitializeGraph_WithValidParameters) {
     // Add checks for valid graph initialization, e.g., number of edges, connectivity, etc.
 }
 
-TEST_F(TrafficGraphTest, InitializeGraph_WithInsufficientPoints) {
+TEST_F(TrafficGraphInitTest, InitializeGraph_WithInsufficientPoints) {
     graph.initializeGraph(1, 5, 100, 100); // Only one point
     ASSERT_TRUE(graph.edges.empty()); // Expect no edges to be formed
 }
