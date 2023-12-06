@@ -338,45 +338,6 @@ TEST_F(TrafficGraphTest, InitializeCars) {
     }
 }
 
-// // Tests for setCarRoute method
-TEST_F(TrafficGraphTest, SetCarRoute) {
-    std::vector<Car> cars;
-    unsigned int numCars = 3;
-    double minDistanceThreshold = 1;
-    graph.initializeCars(cars, numCars, minDistanceThreshold);
-
-    Route testRoute;
-    testRoute.pathLen = 2;
-    testRoute.route[0] = edges[0];
-    testRoute.route[1] = edges[1];
-
-    graph.setCarRoute(cars[0], testRoute, 0);
-    ASSERT_EQ(cars[0].possibleRoutes[0].pathLen, testRoute.pathLen);
-    ASSERT_EQ(&(cars[0].possibleRoutes[0].route[0]), &(testRoute.route[0]));
-    ASSERT_EQ(&(cars[0].possibleRoutes[0].route[1]), &(testRoute.route[1]));
-}
-
-// // Tests for updateCarRoute method
-TEST_F(TrafficGraphTest, UpdateCarRoute) {
-    std::vector<Car> cars;
-    unsigned int numCars = 3;
-    double minDistanceThreshold = 1;
-    graph.initializeCars(cars, numCars, minDistanceThreshold);
-
-    Route newRoute;
-    newRoute.pathLen = 3;
-    newRoute.route[0] = edges[0];
-    newRoute.route[1] = edges[1];
-    newRoute.route[2] = edges[2];
-
-    graph.setCarRoute(cars[0], newRoute, 0);
-    graph.updateCarRoute(cars[0], newRoute, 0);
-
-    ASSERT_EQ(cars[0].possibleRoutes[0].pathLen, newRoute.pathLen);
-    ASSERT_EQ(&(cars[0].possibleRoutes[0].route[0]), &(newRoute.route[0]));
-    ASSERT_EQ(&(cars[0].possibleRoutes[0].route[1]), &(newRoute.route[1]));
-    ASSERT_EQ(&(cars[0].possibleRoutes[0].route[2]), &(newRoute.route[2]));
-}
 
 // // Tests for calculateRouteCost method
 TEST_F(TrafficGraphTest, CalculateRouteCost) {

@@ -34,8 +34,23 @@ void monteCarloQUBOSolver(double** Q, int numSamples, int* bestConfiguration, in
             // #pragma omp for nowait
             for (int sample = 0; sample < numSamples; ++sample) {
                 int* currentConfiguration = new int[size];
-                for (int i = 0; i < size; ++i) {
-                    currentConfiguration[i] = dis(gen); // Randomly assign 0 or 1
+
+                // Reset configuration to -1, indicating no route assigned
+                std::fill_n(currentConfiguration, size, -1);
+
+                for (int car = 0; car < numCars; ++car) {
+                    int routeOffset = car * numRoutesPerCar;  // Calculate the offset in the QUBO matrix for this car
+
+                    // Check for the feasibility of switching routes
+                    if (canSwitchRoute(car)) {
+                        // Assign one of the available routes randomly
+                        int assignedRoute = dis(gen) % numRoutesPerCar;
+                        currentConfiguration[routeOffset + assignedRoute] = 1;
+                    } else {
+                        // If the car cannot switch routes, assign it to its current route
+                        int currentRoute = getCurrentRouteIndex(car);
+                        currentConfiguration[routeOffset + currentRoute] = 1;
+                    }
                 }
 
                 double currentObjectiveValue = calculateObjective(Q, currentConfiguration, size);
