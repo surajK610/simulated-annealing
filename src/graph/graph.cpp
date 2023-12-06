@@ -129,21 +129,6 @@ void TrafficGraph::add_random_edges(const std::set<Edge>& mstEdges, unsigned int
     std::cerr << "Finished adding random edges. Total added: " << addedEdges << "\n";
 }
 
-void printPoints(const std::vector<Point>& points) {
-    std::cout << "Points:" << std::endl;
-    for (const auto& point : points) {
-        std::cout << &point <<  " (" << point.x << ", " << point.y << ")" << std::endl;
-    }
-}
-
-void printEdges(const std::vector<Edge>& edges) {
-    std::cout << "Edges:" << std::endl;
-    for (const auto& edge : edges) {
-        std::cout << "Start: " << edge.start << " (" << edge.start->x << ", " << edge.start->y << "), "
-                    << "End: " << edge.end << " (" <<  edge.end->x << ", " << edge.end->y << "), "
-                    << "Distance: " << edge.distance << std::endl;
-    }
-}
 void TrafficGraph::initializePoints(unsigned int numPoints, unsigned int xBound, unsigned int yBound) {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -163,7 +148,6 @@ void TrafficGraph::initializePoints(unsigned int numPoints, unsigned int xBound,
             // std::cerr << "Generated unique point: (" << newPoint.x << ", " << newPoint.y << ")\n";
         }
     }
-    printPoints(*points);
 }
 
 void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int additionalEdges, unsigned int xBound, unsigned int yBound) {
@@ -178,7 +162,6 @@ void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int addition
     std::unordered_set<Point*> inMST;
 
     initializePoints(numPoints, xBound, yBound);
-    printPoints(*points);
 
     if (points->size() < 2) {
         std::cerr << "Insufficient points to form a graph.\n";
@@ -226,7 +209,6 @@ void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int addition
     for (const auto& edge : mstEdges) {
         addEdge(edge.start, edge.end);
     }
-    printPoints(*points);
      
     std::cerr << "Additional edges added.\n";
 }
@@ -388,13 +370,26 @@ std::vector<Route> TrafficGraph::findAlternativePaths(Point* source, Point* dest
     });
 
     std::vector<Route> alternativeRoutes;
-    for (size_t i = 0; i < similarityScores.size() && alternativeRoutes.size() < 2; ++i) {
-        if (similarityScores[i].first != 0) {
-            alternativeRoutes.push_back(similarityScores[i].second);
+    Route* firstAlternativeRoute = nullptr;
+
+    for (auto& scorePair : similarityScores) {
+        if (scorePair.first != 0) {
+            if (!firstAlternativeRoute) {
+                firstAlternativeRoute = new Route(scorePair.second);
+                alternativeRoutes.push_back(*firstAlternativeRoute);
+            } else {
+                double similarityToFirstAlt = jaccardSimilarity(*firstAlternativeRoute, scorePair.second);
+                if (similarityToFirstAlt != 0) {
+                    alternativeRoutes.push_back(scorePair.second);
+                    if (alternativeRoutes.size() >= 2) {
+                        break;
+                    }
+                }
+            }
         }
     }
-
     delete shortestRoute;
+    delete firstAlternativeRoute;
     return alternativeRoutes;
 }
 
