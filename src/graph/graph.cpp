@@ -71,7 +71,7 @@ void TrafficGraph::addClosestEdges(std::set<Edge>& mstEdges) {
 void TrafficGraph::add_random_edges(const std::set<Edge>& mstEdges, unsigned int additionalEdges) {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis(0, points.size() - 1);
+    std::uniform_int_distribution<> dis(0, points->size() - 1);
 
     unsigned int addedEdges = 0, numTries = 0;
     const double MIN_DISTANCE_THRESHOLD = 30.0;  // Adjust this threshold as needed
@@ -96,8 +96,8 @@ void TrafficGraph::add_random_edges(const std::set<Edge>& mstEdges, unsigned int
             continue;
         }
 
-        Point* start = &points[idx1];
-        Point* end = &points[idx2];
+        Point* start = &((*points)[idx1]);
+        Point* end = &((*points)[idx2]);
         double distance = calculateDistance(*start, *end);
 
         //std::cerr << "Calculated distance: " << distance << "\n";
@@ -224,25 +224,6 @@ void TrafficGraph::addEdge(Point* start, Point* end) {
     edges->push_back(Edge{start, end, distance});
 }
 
-void TrafficGraph::findAllPathsUtil(Point* current, Point* destination, std::vector<Edge>& path, std::vector<Route>& allPaths, std::unordered_set<Point*>& visited) {
-    std::cerr << "Visiting Point: (" << current->x << ", " << current->y << ")\n";
-
-    if (*current == *destination) {
-        Route route;
-        route.pathLen = path.size();d
-        for (size_t i = 0; i < path.size(); ++i) {
-            route.route[i] = path[i];
-        }
-        allPaths.push_back(route);
-
-        std::cerr << "Found a path to destination. Path length: " << route.pathLen << "\n";
-        return;
-    }
-
-    visited.insert(current);
-
-
-
 void  TrafficGraph::findAllPathsUtil(Point* current, Point* destination, std::vector<Edge>& path, std::vector<Route>& allPaths, std::unordered_set<Point*>& visited) {
     if (current == destination) {
         Route route;
@@ -256,7 +237,7 @@ void  TrafficGraph::findAllPathsUtil(Point* current, Point* destination, std::ve
 
     visited.insert(current);
 
-    for (auto& edge : edges) {
+    for (auto& edge : *edges) {
         if (edge.start == current && visited.find(edge.end) == visited.end()) {
             path.push_back(edge);
             findAllPathsUtil(edge.end, destination, path, allPaths, visited);

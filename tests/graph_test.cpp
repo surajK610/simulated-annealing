@@ -14,20 +14,20 @@ public:
     }
 
     void SetUp() override {
-        std::vector<Point> points;
-        std::vector<Edge> edges;
-        // points.push_back({0, 0});
-        // points.push_back({1, 1});
-        // points.push_back({2, 2}); 
+        points.push_back({0, 0});
+        points.push_back({1, 1});
+        points.push_back({2, 2});
+        points.push_back({3, 3}); 
 
-        // Edge edge1 = {&points[0], &points[1], 1.0};
-        // Edge edge2 = {&points[1], &points[2], 2.0};
-        // Edge edge3 = {&points[0], &points[2], 3.0};
 
-        // edges.push_back(edge1);
-        // edges.push_back(edge2);
-        // edges.push_back(edge3);
-        // graph = TrafficGraph(points, edges);
+        Edge edge1 = {&points[0], &points[1], 1.0};
+        Edge edge2 = {&points[1], &points[2], 2.0};
+        Edge edge3 = {&points[2], &points[3], 2.0};
+
+        edges.push_back(edge1);
+        edges.push_back(edge2);
+        edges.push_back(edge3);
+
         graph = TrafficGraph(&points, &edges);
 
     }
@@ -150,21 +150,6 @@ TEST_F(TrafficGraphTest, InitializePoints) {
 }
 
 TEST_F(TrafficGraphTest, FindShortestPath) {
-    points.push_back({0, 0});
-    points.push_back({1, 1});
-    points.push_back({2, 2});
-    points.push_back({3, 3}); 
-
-
-    Edge edge1 = {&points[0], &points[1], 1.0};
-    Edge edge2 = {&points[1], &points[2], 2.0};
-    Edge edge3 = {&points[2], &points[3], 2.0};
-
-    edges.push_back(edge1);
-    edges.push_back(edge2);
-    edges.push_back(edge3);
-
-    graph = TrafficGraph(&points, &edges);
     Route* shortestRoute = graph.findShortestPath(&points[0], &points[3]);
 
     std::cerr << "    ////////////////////////////////////////////" << std::endl;
@@ -182,9 +167,9 @@ TEST_F(TrafficGraphTest, FindShortestPath) {
     delete shortestRoute;
 
     edges.clear();
-    edge1 = {&points[0], &points[1], 1.0};
-    edge2 = {&points[1], &points[2], 2.0};
-    edge3 = {&points[0], &points[2], 4.0};
+    Edge edge1 = {&points[0], &points[1], 1.0};
+    Edge edge2 = {&points[1], &points[2], 2.0};
+    Edge edge3 = {&points[0], &points[2], 4.0};
 
     edges.push_back(edge1);
     edges.push_back(edge2);
