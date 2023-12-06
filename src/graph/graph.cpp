@@ -63,6 +63,7 @@ void TrafficGraph::initializePoints(unsigned int numPoints, unsigned int xBound,
     std::uniform_int_distribution<> disX(0, xBound);
     std::uniform_int_distribution<> disY(0, yBound);
     std::unordered_set<std::string> uniqueCheck;
+    std::cerr << "Starting Unique Point Generation...\n";
 
     while (points.size() < numPoints) {
         short unsigned int x = static_cast<short unsigned int>(disX(gen));
@@ -72,7 +73,7 @@ void TrafficGraph::initializePoints(unsigned int numPoints, unsigned int xBound,
         std::string pointKey = std::to_string(newPoint.x) + "-" + std::to_string(newPoint.y);
         if (uniqueCheck.insert(pointKey).second) {
             points.push_back(newPoint);
-            std::cout << "Generated unique point: (" << newPoint.x << ", " << newPoint.y << ")\n";
+            std::cerr << "Generated unique point: (" << newPoint.x << ", " << newPoint.y << ")\n";
         }
     }
 }
@@ -80,17 +81,17 @@ void TrafficGraph::initializePoints(unsigned int numPoints, unsigned int xBound,
 
 
 void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int additionalEdges, unsigned int xBound, unsigned int yBound) {
-    std::cout << "Initializing points...\n";
+    std::cerr << "Initializing points...\n";
     std::unordered_set<Point*> inMST;
 
     initializePoints(numPoints, xBound, yBound);
 
     if (points.size() < 2) {
-        std::cout << "Insufficient points to form a graph.\n";
+        std::cerr << "Insufficient points to form a graph.\n";
         return;
     }
 
-    std::cout << "Initializing graph using Prim's algorithm...\n";
+    std::cerr << "Initializing graph using Prim's algorithm...\n";
 
     auto comp = [](const Edge& e1, const Edge& e2) { return e1.distance > e2.distance; };
     std::priority_queue<Edge, std::vector<Edge>, decltype(comp)> pq(comp);
@@ -112,7 +113,7 @@ void TrafficGraph::initializeGraph(unsigned int numPoints, unsigned int addition
 
         mstEdges.insert(smallestEdge);
         inMST.insert(smallestEdge.end);
-        std::cout << "Added edge between (" << smallestEdge.start->x << "," << smallestEdge.start->y << ") and (" << smallestEdge.end->x << "," << smallestEdge.end->y << ") with distance " << smallestEdge.distance << ".\n";
+        std::cerr << "Added edge between (" << smallestEdge.start->x << "," << smallestEdge.start->y << ") and (" << smallestEdge.end->x << "," << smallestEdge.end->y << ") with distance " << smallestEdge.distance << ".\n";
 
         for (auto& point : points) {
             if (inMST.find(&point) == inMST.end()) {

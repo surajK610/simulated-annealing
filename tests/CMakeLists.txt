@@ -9,6 +9,7 @@ add_executable(runUnitTests
     test_main.cpp
     graph_test.cpp
     qubo_test.cpp
+    graph_init_test.cpp
 )
 
 # Link test executable against gtest & gtest_main and the parts of your project being tested
