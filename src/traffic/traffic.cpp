@@ -1,4 +1,4 @@
-#include "graph.h"
+#include "traffic.h"
 #include <random>
 #include <limits>
 #include <cmath>
@@ -269,12 +269,10 @@ double jaccardSimilarity(Route& route1, Route& route2) {
     
     for (int i = 0; i < route1.pathLen; ++i) {
         edgesInRoute1.insert(route1.route[i]);
-        // ... Debug print statements
     }
     
     for (int i = 0; i < route2.pathLen; ++i) {
         edgesInRoute2.insert(route2.route[i]);
-        // ... Debug print statements
     }
 
     int intersectionSize = 0;
@@ -450,8 +448,6 @@ std::vector<Route> TrafficGraph::findAlternativePaths(Point* source, Point* dest
 // TrafficRoute Methods (Cars)
 //////////////////////////////////////////////////////////////
 
-
-
 double** TrafficGraph::routes_to_q(const std::vector<Car>& cars) {
     // Determine the size of the Q matrix
     int size = calculateQMatrixSize(cars); // You need to implement this
@@ -530,7 +526,6 @@ bool TrafficGraph::routesShareSegment(const Route& route1, const Route& route2) 
     return false;
 }
 
-// Implementation of getRandomPoint
 Point* TrafficGraph::getRandomPoint() {
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -539,13 +534,11 @@ Point* TrafficGraph::getRandomPoint() {
     return &((*points)[index]);
 }
 
-// Implementation of isDistanceSufficient
 bool TrafficGraph::isDistanceSufficient(const Point& a, const Point& b, double threshold) {
     double distance = calculateDistance(a, b);
     return distance >= threshold;
 }
 
-// Implementation of initializeCars
 void TrafficGraph::initializeCars(std::vector<Car>& cars, unsigned int numCars, double minDistanceThreshold) {
     cars.clear();
     cars.reserve(numCars);
@@ -575,3 +568,18 @@ void TrafficGraph::initializeCars(std::vector<Car>& cars, unsigned int numCars, 
     }
 }
 
+void TrafficGraph::setCarRoute(Car& car, const Route& route, unsigned int routeIndex) {
+    if (routeIndex < Car::MAX_POSSIBLE_ROUTES) {
+        car.possibleRoutes[routeIndex] = route;
+    } else {
+        std::cerr << "Error: Invalid route index in setCarRoute for car ID " << car.id << std::endl;
+    }
+}
+
+void TrafficGraph::updateCarRoute(Car& car, const Route& newRoute, unsigned int routeIndex) {
+    if (routeIndex < Car::MAX_POSSIBLE_ROUTES) {
+        car.possibleRoutes[routeIndex] = newRoute;
+    } else {
+        std::cerr << "Error: Invalid route index in updateCarRoute for car ID " << car.id << std::endl;
+    }
+}

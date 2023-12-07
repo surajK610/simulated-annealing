@@ -1,5 +1,5 @@
-#ifndef TRAFFIC_GRAPH_H
-#define TRAFFIC_GRAPH_H
+#ifndef TRAFFIC_GRAPH
+#define TRAFFIC_GRAPH
 
 #include <vector>
 #include <set>

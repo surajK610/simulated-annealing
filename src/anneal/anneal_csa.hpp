@@ -1,87 +1,28 @@
-#ifndef ANNEAL_OMP_HPP
-#define ANNEAL_OMP_HPP
+#ifndef ANNEAL_CSA
+#define ANNEAL_CSA
 
 #include <cmath>
 #include <omp.h>
 #include <vector>
+#include "context.hpp"
 
+namespace CSA {
 
-class Context
+class SolverCoupled : public BaseSolver
 {
 public:
-
-    std::vector<double> x;
-    std::vector<double> best_x;
-    double cost;
-    double best_cost;
-
-    /// \param n   The dimension of `x0`.
-    /// \param x0  The initial solution guess.
-    /// \param fx0 The value of the cost function associated with `x0`.
-  
-    Context(int n, const double* x0, double fx0)
-    {
-        this->x = std::vector<double>(x0, x0 + n);
-        this->best_x = std::vector<double>(x0, x0 + n);
-        this->cost = fx0;
-        this->best_cost = fx0;
-    }
-
-    /// \param y      The new solution.
-    /// \param y_cost The value of the cost function associated with `y`.
-
-    inline void step(std::vector<double> &y, double y_cost)
-    {
-        this->cost = y_cost;
-        this->x.swap(y);
-    }
-}; 
-
-
-class SharedStates
-{
-public:
-    const int m;
-    const int n;
-
-    std::vector<Context> states;
-
-    Context& operator[](int i) {
-        return this->states[i];
-    }
-
-    const Context& operator[](int i) const {
-        return this->states[i];
-    }
-
-    /// \param m   The number of threads/shared states.
-    /// \param n   The dimension of `x0`.
-    /// \param x0  The initial solution guess. Each thread will start from the
-    ///            same initial solution.
-    /// \param fx0 The value of the cost function associated with `x0`.
-
-    SharedStates(int m, int n, const double* x0, double fx0)
-        : m(m), n(n), states(m, Context(n, x0, fx0))
-    {
-    }
-};  // class SharedStates
-
-
-class Solver
-{
-public:
-    int m = 4;
-    int max_iters = 100000;
+    int m = 4; // number of threads
+    int max_iters = 1000000;
     float tgen_initial = 0.01;
     float tgen_schedule = 0.99999;
     float tacc_initial = 0.9;
     float tacc_schedule = 0.01;
     float desired_variance = 0.99;
 
-    Solver() {  };
+    SolverCoupled() {  };
 
     inline int minimize(
-        int n,
+        int n, // number of dimensions
         double* x,
         double (*fx)(void*, double*),
         void (*step)(void*, double* y, const double*, float tgen),
@@ -104,7 +45,7 @@ public:
         omp_lock_t lock;
         omp_init_lock(&lock);
 
-        #pragma omp parallel shared(n, shared_states, tacc, tgen, gamma) num_threads(this->m) default(none)
+        #pragma omp parallel shared(n, shared_states, tacc, tgen, gamma) num_threads(this->m)
         {
             int k, opt_id = omp_get_thread_num();
 
@@ -114,7 +55,6 @@ public:
             float unif, prob;
 
             #pragma omp for
-
             for (int iter = 0; iter < this->max_iters; ++iter) {
 
                 step(instance, y.data(), shared_states[opt_id].x.data(), tgen);
@@ -177,7 +117,7 @@ public:
                 best_ind = k;
             }
         }
-        Context<double,double> best_state = shared_states[best_ind];
+        Context best_state = shared_states[best_ind];
         for (int i = 0; i < n; ++i)
             x[i] = best_state.best_x[i];
 
@@ -186,7 +126,7 @@ public:
 
         return 0;
     }
-};  // class Solver
-
+};  // class SolverCoupled
+}  // namespace ANNEAL_OMP
 #endif
 
