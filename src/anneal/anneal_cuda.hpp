@@ -78,115 +78,113 @@ public:
     float tacc_schedule = 0.01;
     float desired_variance = 0.99;
 
-    Solver() {  };
+    Solver() { /* Initialization if needed */ };
 
-    inline int minimize(
-        int n,
-        double* x,
-        double (*fx)(void*, double*),
-        void (*step)(void*, double* y, const double*, float tgen),
-        void (*progress)(void*,
-                         double cost,
-                         float tgen,
-                         float tacc,
-                         int opt_id,
-                         int iter),
-        void* instance)
-    {
-        double fx0 = fx(instance, x);
+    // Kernel to update states based on new costs and probabilistic acceptance
+    __global__ void update_states(double* dev_x, double* dev_y, double* dev_cost, double* dev_best_cost, float tacc, int n, int m) {
+        int idx = blockIdx.x * blockDim.x + threadIdx.x;
+        if (idx < m) {
+            double cost = dev_cost[idx];
+            double current_cost = /* retrieve current cost for this state */;
+            double best_cost = dev_best_cost[idx];
 
-        // Initialize shared values.
-        SharedStates shared_states(this->m, n, x, fx0);
-        float tacc = this->tacc_initial;
-        float tgen = this->tgen_initial;
-        float tmp, sum_a, prob_var, gamma = m;
-
-        omp_lock_t lock;
-        omp_init_lock(&lock);
-
-        #pragma omp parallel shared(n, shared_states, tacc, tgen, gamma) num_threads(this->m) default(none)
-        {
-            int k, opt_id = omp_get_thread_num();
-
-            double max_cost = shared_states[0].cost;
-            double cost;
-            std::vector<double> y(n, double(0));
-            float unif, prob;
-
-            #pragma omp for
-
-            for (int iter = 0; iter < this->max_iters; ++iter) {
-
-                step(instance, y.data(), shared_states[opt_id].x.data(), tgen);
-                cost = fx(instance, y.data());
-
-                if (cost < shared_states[opt_id].cost) {
-                    omp_set_lock(&lock);
-
-                    if (cost < shared_states[opt_id].best_cost) {
-                        shared_states[opt_id].best_cost = cost;
-                        shared_states[opt_id].best_x = y;
-                        if (progress != nullptr)
-                            progress(instance, cost, tgen, tacc, opt_id, iter);
-                    }
-
-                    shared_states[opt_id].step(y, cost);
-                    omp_unset_lock(&lock);
-                } else {
-
-                    unif = drand48();
-                    prob = std::exp((shared_states[opt_id].cost - max_cost) / tacc) / gamma;
-                    if (prob > unif) {
-                        omp_set_lock(&lock);
-                        shared_states[opt_id].step(y, cost);
-                        omp_unset_lock(&lock);
-                    }
+            // Probabilistic acceptance condition
+            double unif = /* generate a uniform random number */;
+            double prob = exp((current_cost - cost) / tacc);
+            if (cost < current_cost || unif < prob) {
+                // Update state
+                for (int i = 0; i < n; ++i) {
+                    dev_x[idx * n + i] = dev_y[idx * n + i];
                 }
-
-                if (omp_test_lock(&lock)) {
-                    max_cost = shared_states[0].cost;
-                    for (k = 0; k < this->m; ++k)
-                        if (shared_states[k].cost > max_cost)
-                            max_cost = shared_states[k].cost;
-
-                    gamma = sum_a = 0.;
-                    for (k = 0; k < this->m; ++k) {
-                        tmp = (shared_states[k].cost - max_cost) / tacc;
-                        gamma += std::exp(tmp);
-                        sum_a += std::exp(2.0 * tmp);
+                // Update best state if necessary
+                if (cost < best_cost) {
+                    dev_best_cost[idx] = cost;
+                    for (int i = 0; i < n; ++i) {
+                        /* update best state */;
                     }
-                    prob_var = (this->m * (sum_a / (gamma * gamma)) - 1.) /
-                               (this->m * this->m);
-
-                    if (prob_var > this->desired_variance)
-                        tacc += this->tacc_schedule * tacc;
-                    else
-                        tacc -= this->tacc_schedule * tacc;
-                    tgen = this->tgen_schedule * tgen;
-
-                    omp_unset_lock(&lock);
                 }
             }
         }
+    }
 
-        int best_ind = 0;
-        double best_cost = shared_states[0].best_cost;
-        for (int k = 0; k < this->m; ++k) {
-            if (shared_states[k].best_cost < best_cost) {
-                best_cost = shared_states[k].best_cost;
-                best_ind = k;
-            }
+
+    // Function to retrieve the best state
+    void retrieve_best_state(double* host_x, double* dev_best_x, int n, int m) {
+        double* host_best_x = new double[n * m];
+        CUDA_CALL(cudaMemcpy(host_best_x, dev_best_x, n * m * sizeof(double), cudaMemcpyDeviceToHost));
+
+        // Find the index of the best state
+        int best_idx = /* logic to find the index of the best state */;
+        for (int i = 0; i < n; ++i) {
+            host_x[i] = host_best_x[best_idx * n + i];
         }
-        Context<double,double> best_state = shared_states[best_ind];
-        for (int i = 0; i < n; ++i)
-            x[i] = best_state.best_x[i];
 
-        // Clean up.
-        omp_destroy_lock(&lock);
+        delete[] host_best_x;
+    }
+
+
+    int minimize(int n, double* x, void* instance) {
+        // Allocate memory on the device...
+        double *dev_x, *dev_y, *dev_result;
+        CUDA_CALL(cudaMalloc(&dev_x, n * sizeof(double)));
+        CUDA_CALL(cudaMalloc(&dev_y, n * sizeof(double)));
+        CUDA_CALL(cudaMalloc(&dev_result, n * sizeof(double)));
+
+        // Initialize CURAND states...
+        curandState *dev_states;
+        CUDA_CALL(cudaMalloc(&dev_states, n * sizeof(curandState)));
+        setup_kernel<<<numBlocks, blockSize>>>(dev_states, time(NULL)); // Initializing CURAND states
+
+        // Define CUDA streams for parallel annealing states...
+        cudaStream_t streams[m];
+        for (int i = 0; i < m; ++i) {
+            CUDA_CALL(cudaStreamCreate(&streams[i]));
+        }
+
+        // Initialize temperatures and other parameters...
+        float tgen = tgen_initial;
+        float tacc = tacc_initial;
+
+        // Main annealing loop...
+        for (int iter = 0; iter < max_iters; ++iter) {
+            for (int i = 0; i < m; ++i) {
+                // Perform the annealing step and function evaluation on each stream...
+                // step_c(instance, dev_y, dev_x, tgen, n, dev_x, dev_y, dev_states, streams[i]);
+                // double cost = f_c(instance, dev_x, n, dev_x, dev_result, streams[i]);
+                // TODO: Implemt step_cost_c
+
+                
+                // Update the shared states...
+                update_states<<<1, 1, 0, streams[i]>>>(dev_x, dev_y, dev_result, tacc, n, i);
+            }
+
+            // Synchronize all streams...
+            for (int i = 0; i < m; ++i) {
+                CUDA_CALL(cudaStreamSynchronize(streams[i]));
+            }
+
+            // Update temperatures and other shared parameters...
+            tgen *= tgen_schedule;
+            tacc *= tacc_schedule;
+
+            // Check for convergence or other stopping criteria...
+            // (Optional: Implement as needed)
+        }
+
+        // After the main loop, retrieve the best state
+        retrieve_best_state(x, dev_best_x, n, m);
+
+        // Copy the best result back to host...
+        CUDA_CALL(cudaMemcpy(x, dev_y, n * sizeof(double), cudaMemcpyDeviceToHost));
+
+        // Cleanup...
+        for (int i = 0; i < m; ++i) {
+            CUDA_CALL(cudaStreamDestroy(streams[i]));
+        }
+        CUDA_CALL(cudaFree(dev_x));
+        CUDA_CALL(cudaFree(dev_y));
+        CUDA_CALL(cudaFree(dev_result));
+        CUDA_CALL(cudaFree(dev_states));
 
         return 0;
-    }
-};  // class Solver
-
-#endif
-
+}
