@@ -1,74 +1,14 @@
-#ifndef ANNEAL_OMP
-#define ANNEAL_OMP
+#ifndef ANNEAL_MSA
+#define ANNEAL_MSA
 
 #include <cmath>
 #include <omp.h>
 #include <vector>
+#include "context.hpp"
 
+namespace MSA {
 
-namespace ANNEAL_OMP {
-class ContextOMP
-{
-public:
-
-    std::vector<double> x;
-    std::vector<double> best_x;
-    double cost;
-    double best_cost;
-
-    /// \param n   The dimension of `x0`.
-    /// \param x0  The initial solution guess.
-    /// \param fx0 The value of the cost function associated with `x0`.
-  
-    ContextOMP(int n, const double* x0, double fx0)
-    {
-        this->x = std::vector<double>(x0, x0 + n);
-        this->best_x = std::vector<double>(x0, x0 + n);
-        this->cost = fx0;
-        this->best_cost = fx0;
-    }
-
-    /// \param y      The new solution.
-    /// \param y_cost The value of the cost function associated with `y`.
-
-    inline void step(std::vector<double> &y, double y_cost)
-    {
-        this->cost = y_cost;
-        this->x.swap(y);
-    }
-}; 
-
-
-class SharedStates
-{
-public:
-    const int m;
-    const int n;
-
-    std::vector<ContextOMP> states;
-
-    ContextOMP& operator[](int i) {
-        return this->states[i];
-    }
-
-    const ContextOMP& operator[](int i) const {
-        return this->states[i];
-    }
-
-    /// \param m   The number of threads/shared states.
-    /// \param n   The dimension of `x0`.
-    /// \param x0  The initial solution guess. Each thread will start from the
-    ///            same initial solution.
-    /// \param fx0 The value of the cost function associated with `x0`.
-
-    SharedStates(int m, int n, const double* x0, double fx0)
-        : m(m), n(n), states(m, ContextOMP(n, x0, fx0)) // m different ContextOMP
-    {
-    }
-};  // class SharedStates
-
-
-class SolverOMP
+class SolverMultiple : public BaseSolver
 {
 public:
     int m = 4; // number of threads
@@ -79,7 +19,7 @@ public:
     float tacc_schedule = 0.01;
     float desired_variance = 0.99;
 
-    SolverOMP() {  };
+    SolverMultiple() {  };
 
     inline int minimize(
         int n, // number of dimensions
@@ -96,11 +36,10 @@ public:
     {
         double fx0 = fx(instance, x);
 
-        // Initialize shared values.
         SharedStates shared_states(this->m, n, x, fx0);
         float tacc = this->tacc_initial;
         float tgen = this->tgen_initial;
-        float tmp, sum_a, prob_var, gamma = m;
+        float gamma = 1;
 
         omp_lock_t lock;
         omp_init_lock(&lock);
@@ -143,29 +82,10 @@ public:
                     }
                 }
 
-                if (omp_test_lock(&lock)) {
-                    max_cost = shared_states[0].cost;
-                    for (k = 0; k < this->m; ++k)
-                        if (shared_states[k].cost > max_cost)
-                            max_cost = shared_states[k].cost;
-
-                    gamma = sum_a = 0.;
-                    for (k = 0; k < this->m; ++k) {
-                        tmp = (shared_states[k].cost - max_cost) / tacc;
-                        gamma += std::exp(tmp);
-                        sum_a += std::exp(2.0 * tmp);
-                    }
-                    prob_var = (this->m * (sum_a / (gamma * gamma)) - 1.) /
-                               (this->m * this->m);
-
-                    if (prob_var > this->desired_variance)
-                        tacc += this->tacc_schedule * tacc;
-                    else
-                        tacc -= this->tacc_schedule * tacc;
-                    tgen = this->tgen_schedule * tgen;
-
-                    omp_unset_lock(&lock);
-                }
+                tacc += this->tacc_schedule * tacc;
+                if (tacc > this->desired_variance)
+                    tacc -= this->desired_variance;
+                tgen = this->tgen_schedule * tgen;
             }
         }
 
@@ -177,7 +97,7 @@ public:
                 best_ind = k;
             }
         }
-        ContextOMP best_state = shared_states[best_ind];
+        Context best_state = shared_states[best_ind];
         for (int i = 0; i < n; ++i)
             x[i] = best_state.best_x[i];
 

@@ -46,6 +46,3 @@ test: $(TEST_EXECUTABLE)
 .PHONY : clean
 clean :
 	rm -f $(MAIN_EXECUTABLE) $(TEST_EXECUTABLE) $(BUILD_DIR)/*.o
-	rm -rf run_csa.dSYM/
-	rm -f ./include/*.gch
-	cd ./docs && rm -rf doc/

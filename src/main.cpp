@@ -2,9 +2,10 @@
 #include <cmath>
 #include <iostream>
 
-#include "anneal/anneal_omp.hpp"
-#include "anneal/anneal.hpp"
-
+#include "anneal/anneal_csa.hpp"
+#include "anneal/anneal_csa_st.hpp"
+#include "anneal/anneal_msa.hpp"
+#include "anneal/context.hpp"
 #include "schwefel/schwefel.hpp"
 
 void progress(
@@ -19,19 +20,34 @@ void progress(
     return ;
 }
 
-
-int main()
+int main(int argc, char** argv)
 {
-    srand(0);
+    int option = 0;
+    if (argc > 1)
+        option = atoi(argv[1]);
+
+    BaseSolver* solver = nullptr;
+
+    if (option == OPTION_MSA) {
+        solver = new MSA::SolverMultiple();
+    } else if (option == OPTION_CSA_ST) {
+        solver = new CSA_ST::SolverCoupledST();
+    } else if (option == OPTION_CSA) {
+        solver = new CSA::SolverCoupled();
+    } else {
+        std::cout << "Invalid option" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    srand(1);
 
     double* x = new double[SCHWEFEL::DIM];
     for (int i = 0; i < SCHWEFEL::DIM; ++i)
         x[i] = drand48();
     double cost = f(nullptr, x);
     printf("Initial cost: %f\n", cost);
-
-    ANNEAL_OMP::SolverOMP solver;
-    solver.minimize(SCHWEFEL::DIM, x, f, step, progress, nullptr);
+       
+    solver->minimize(SCHWEFEL::DIM, x, f, step, progress, nullptr);
 
     cost = f(nullptr, x);
     printf("Best cost: %f\nx =\n", cost);
