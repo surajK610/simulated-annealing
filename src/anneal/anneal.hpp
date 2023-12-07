@@ -1,10 +1,11 @@
 #ifndef ANNEAL
-#ifndef ANNEAL_HPP
-#define ANNEAL_HPP
+#define ANNEAL
 
 #include <cmath>
 #include <vector>
+#include <omp.h>
 
+namespace ANNEAL {
 class Context
 {
 public:
@@ -38,8 +39,8 @@ public:
 class Solver
 {
 public:
-    int m = 4;
-    int max_iters = 100000;
+    int m = 1;
+    int max_iters = 1000000;
     float tgen_initial = 0.01;
     float tgen_schedule = 0.99999;
     float tacc_initial = 0.9;
@@ -59,7 +60,7 @@ public:
                          float tacc,
                          int opt_id,
                          int iter),
-        void* instance);
+        void* instance)
         
     {
         double fx0 = fx(instance, x);
@@ -70,15 +71,13 @@ public:
         float tmp, sum_a, prob_var, gamma = m;
 
     
-        int k, opt_id = omp_get_thread_num();
-
         double max_cost = state.cost;
         double cost;
         std::vector<double> y(n, double(0));
         float unif, prob;
 
 
-        for (int iter = 0; iter < this->max_iters; ++iter) {≈
+        for (int iter = 0; iter < this->max_iters; ++iter) {
             step(instance, y.data(), state.x.data(), tgen);
             cost = fx(instance, y.data());
 
@@ -87,7 +86,7 @@ public:
                     state.best_cost = cost;
                     state.best_x = y;
                     if (progress != nullptr)
-                        progress(instance, cost, tgen, tacc, opt_id, iter);
+                        progress(instance, cost, tgen, tacc, 0, iter);
                 }
 
                 state.step(y, cost);
@@ -119,7 +118,7 @@ public:
           x[i] = state.best_x[i];
         return 0;
     }
-};  // class Solver
-
+};  // class SolverLinear
+}  // namespace ANNEAL
 #endif
 

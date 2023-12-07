@@ -1,11 +1,13 @@
-#ifndef SCHWEFEL_HPP
-#define SCHWEFEL_HPP
+#ifndef SCHWEFEL
+#define SCHWEFEL
 #include <cmath>
 #include <vector>
 
 
-#define PI 3.14159265358979323846264338327
-#define DIM 10
+namespace SCHWEFEL {
+
+const double PI  = 3.14159265358979323846264338327;
+const int DIM = 10;
 
 // This defines the Schwefel function. The pointer `instance` can be used to
 // pass data to `f`, such as the dimension.
@@ -31,5 +33,5 @@ void step(void* instance, double* y, const double* x, float tgen)
         y[i] = tmp;
     }
 }
-
+}
 #endif

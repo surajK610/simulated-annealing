@@ -1,1 +1,0 @@
-add_library(qubo STATIC qubo.cpp)

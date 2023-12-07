@@ -32,7 +32,7 @@ TEST(Qubo, CalculateObjective) {
     int configuration[3] = {1, 0, 1};
 
     double expectedValue = 4; // Calculate this by hand for your test case
-    double objectiveValue = calculateObjective(Q, configuration, 3);
+    double objectiveValue = QUBO::calculateObjective(Q, configuration, 3);
 
     deleteDynamic2DArray(Q, 3); // Clean up dynamic array
     EXPECT_DOUBLE_EQ(expectedValue, objectiveValue);
@@ -49,40 +49,12 @@ TEST(Qubo, MonteCarloQUBOSolver) {
     int numSamples = 1000; // Number of samples for the Monte Carlo simulation
     int bestConfiguration[3];
 
-    monteCarloQUBOSolver(Q, numSamples, bestConfiguration, 3);
+    QUBO::monteCarloQUBOSolver(Q, 3, numSamples, bestConfiguration, 3);
 
     // Ensure the best configuration is a valid binary string
     for (int i = 0; i < 3; ++i) {
         EXPECT_TRUE(bestConfiguration[i] == 0 || bestConfiguration[i] == 1);
     }
 
-    deleteDynamic2DArray(Q, 3); // Clean up dynamic array
-}
-
-// Additional test cases for CalculateObjective function
-TEST(QuboSolver, CalculateObjectiveAdditionalCases) {
-    double staticQ[3][3] = {
-        {1, -2, 1},
-        {-2, 4, -2},
-        {1, -2, 1}
-    };
-    double** Q = createDynamic2DArray(staticQ, 3);
-
-    // Additional test cases...
-    // Use Q in your test cases, and then delete it at the end
-    deleteDynamic2DArray(Q, 3); // Clean up dynamic array
-}
-
-// Additional test cases for MonteCarloQUBOSolver function
-TEST(QuboSolver, MonteCarloQUBOSolverAdditionalCases) {
-    double staticQ[3][3] = {
-        {1, -2, 1},
-        {-2, 4, -2},
-        {1, -2, 1}
-    };
-    double** Q = createDynamic2DArray(staticQ, 3);
-
-    // Additional test cases...
-    // Use Q in your test cases, and then delete it at the end
     deleteDynamic2DArray(Q, 3); // Clean up dynamic array
 }

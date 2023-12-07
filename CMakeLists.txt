@@ -1,24 +1,17 @@
-cmake_minimum_required(VERSION 3.8)
-project(mc_traffic_optimization)
+# Find and include Google Test
+find_package(GTest REQUIRED)
 
-# Set the C++ standard
-set(CMAKE_CXX_STANDARD 17)
+if(GTEST_FOUND)
+    message(STATUS "Google Test found. Including Google Test in the build.")
+    message(STATUS "Google Test include directories: ${GTEST_INCLUDE_DIRS}")
+    message(STATUS "Google Test library: ${GTEST_LIBRARIES}")
+    include_directories(${GTEST_INCLUDE_DIRS})
+else()
+    message(STATUS "Google Test not found. Tests will not be built.")
+endif()
 
-# Set the include directory
-include_directories(${PROJECT_SOURCE_DIR}/src)
+# Add your test sources here
+add_executable(test_suite test/test1.cpp test/test2.cpp)
 
-# Add subdirectories for the graph and qubo components
-add_subdirectory(src/graph)
-add_subdirectory(src/qubo)
-add_subdirectory(src/anneal)
-add_subdirectory(src/schwefel)
-
-# Add the main executable
-add_executable(mcto src/main.cpp)
-
-# Link the graph and qubo libraries with the main executable
-target_link_libraries(mcto graph qubo)
-
-# Enable testing and add the tests subdirectory
-enable_testing()
-add_subdirectory(tests)
+# Link the test executable with Google Test
+target_link_libraries(test_suite GTest::GTest GTest::Main)

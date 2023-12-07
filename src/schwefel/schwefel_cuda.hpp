@@ -1,11 +1,13 @@
-#ifndef SCHWEFEL_CUDA_HPP
-#define SCHWEFEL_CUDA_HPP
+#ifndef SCHWEFEL_CUDA
+#define SCHWEFEL_CUDA
 
 #include <cmath>
 #include <vector>
 #include <cuda.h>
 #include <curand.h>
 #include <curand_kernel.h>
+
+namespace SCHWEFEL_CUDA {
 
 __global__ void f_kernel(double* x, double* result, int dim) {
     int idx = threadIdx.x + blockIdx.x * blockDim.x;
@@ -63,6 +65,7 @@ void step_c(void* instance, double* y, const double* x, float tgen, int dim) {
 
     cudaFree(dev_x);
     cudaFree(dev_y);
+}
 }
 
 #endif
