@@ -338,6 +338,7 @@ TEST_F(TrafficGraphTest, InitializeCars) {
     }
 }
 
+<<<<<<< HEAD
 // // Tests for setCarRoute method
 TEST_F(TrafficGraphTest, SetCarRoute) {
     std::vector<Car> cars;
@@ -381,6 +382,8 @@ TEST_F(TrafficGraphTest, UpdateCarRoute) {
     ASSERT_EQ(&(cars[0].possibleRoutes[0].route[1]), &(newRoute.route[1]));
     ASSERT_EQ(&(cars[0].possibleRoutes[0].route[2]), &(newRoute.route[2]));
 }
+=======
+>>>>>>> 30654d90c80ce36b204c1166e9853a87c0f5774d
 
 // // Tests for calculateRouteCost method
 TEST_F(TrafficGraphTest, CalculateRouteCost) {
