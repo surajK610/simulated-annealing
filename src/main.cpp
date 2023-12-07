@@ -5,6 +5,7 @@
 #include "anneal/anneal_csa.hpp"
 #include "anneal/anneal_csa_st.hpp"
 #include "anneal/anneal_msa.hpp"
+#include "anneal/anneal_msa_st.hpp"
 #include "anneal/context.hpp"
 #include "schwefel/schwefel.hpp"
 
@@ -27,8 +28,9 @@ int main(int argc, char** argv)
         option = atoi(argv[1]);
 
     BaseSolver* solver = nullptr;
-
-    if (option == OPTION_MSA) {
+    if (option == OPTION_MSA_ST) {
+        solver = new MSA_ST::SolverMultipleST();
+    } else if (option == OPTION_MSA) {
         solver = new MSA::SolverMultiple();
     } else if (option == OPTION_CSA_ST) {
         solver = new CSA_ST::SolverCoupledST();

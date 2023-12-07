@@ -66,7 +66,7 @@ public:
 };  // class SharedStates
 
 
-enum SolverOption { OPTION_MSA, OPTION_CSA_ST, OPTION_CSA};
+enum SolverOption { OPTION_MSA_ST, OPTION_MSA, OPTION_CSA_ST, OPTION_CSA};
 
 class BaseSolver {
 public:
