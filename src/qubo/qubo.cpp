@@ -24,7 +24,6 @@ void monteCarloQUBOSolver(double** Q, int numSamples, int* bestConfiguration, in
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> dis(0, 1);
-
     // try {
     //     #pragma omp parallel shared(bestObjectiveValue, bestConfiguration)
     //     {
@@ -44,7 +43,6 @@ void monteCarloQUBOSolver(double** Q, int numSamples, int* bestConfiguration, in
                     threadLocalBestObjectiveValue = currentObjectiveValue;
                     std::swap(threadLocalBestConfiguration, currentConfiguration);
                 }
-
                 delete[] currentConfiguration;
             }
 

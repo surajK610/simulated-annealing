@@ -563,7 +563,7 @@ void TrafficGraph::initializeCars(std::vector<Car>& cars, unsigned int numCars, 
             src = getRandomPoint();
             dest = getRandomPoint();
             std::cerr << "Random points selected: (" << src->x << ", " << src->y << ") and (" << dest->x << ", " << dest->y << ").\n";
-            
+
         } while (!isDistanceSufficient(*src, *dest, minDistanceThreshold));
 
         car.source = src;
@@ -575,18 +575,3 @@ void TrafficGraph::initializeCars(std::vector<Car>& cars, unsigned int numCars, 
     }
 }
 
-void TrafficGraph::setCarRoute(Car& car, const Route& route, unsigned int routeIndex) {
-    if (routeIndex < Car::MAX_POSSIBLE_ROUTES) {
-        car.possibleRoutes[routeIndex] = route;
-    } else {
-        std::cerr << "Error: Invalid route index in setCarRoute for car ID " << car.id << std::endl;
-    }
-}
-
-void TrafficGraph::updateCarRoute(Car& car, const Route& newRoute, unsigned int routeIndex) {
-    if (routeIndex < Car::MAX_POSSIBLE_ROUTES) {
-        car.possibleRoutes[routeIndex] = newRoute;
-    } else {
-        std::cerr << "Error: Invalid route index in updateCarRoute for car ID " << car.id << std::endl;
-    }
-}

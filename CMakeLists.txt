@@ -10,6 +10,8 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 # Add subdirectories for the graph and qubo components
 add_subdirectory(src/graph)
 add_subdirectory(src/qubo)
+add_subdirectory(src/anneal)
+add_subdirectory(src/schwefel)
 
 # Add the main executable
 add_executable(mcto src/main.cpp)

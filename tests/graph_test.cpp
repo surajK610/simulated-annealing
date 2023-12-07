@@ -373,6 +373,10 @@ TEST_F(TrafficGraphTest, UpdateCarRoute) {
     graph.updateCarRoute(cars[0], newRoute, 0);
 
     ASSERT_EQ(cars[0].possibleRoutes[0].pathLen, newRoute.pathLen);
+
+    printRoute(cars[0].possibleRoutes[0]);
+    printRoute(newRoute);
+
     ASSERT_EQ(&(cars[0].possibleRoutes[0].route[0]), &(newRoute.route[0]));
     ASSERT_EQ(&(cars[0].possibleRoutes[0].route[1]), &(newRoute.route[1]));
     ASSERT_EQ(&(cars[0].possibleRoutes[0].route[2]), &(newRoute.route[2]));
