@@ -4,6 +4,8 @@ module: cuda: To use: module load gcc/10.2
 module: unloading 'gcc/10.2'
 module: loading 'gcc/10.2'
 module: gcc: "Note: loading the gcc module overrides the gcc version on the system.  If you want to revert to the version of gcc provided by the OS, unload the gcc module."
+module: unloading 'googletest/1.8.0'
+module: loading 'googletest/1.8.0'
 src/qubo/qubo.cpp: In function ‘void QUBO::monteCarloQUBOSolver(double**, int, int, int*, int)’:
 src/qubo/qubo.cpp:24:10: warning: unused variable ‘localBestConfiguration’ [-Wunused-variable]
    24 |     int* localBestConfiguration = new int[size];
@@ -35,8 +37,3 @@ src/schwefel/schwefel_cuda.cu(50): warning #68-D: integer conversion resulted in
 
 Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
 
-SKIPPED: /oscar/home/sanand14/mc_traffic_optimization/outputs/gpu_report_msa_st.sqlite does not contain NV Tools Extension (NVTX) data.
-SKIPPED: /oscar/home/sanand14/mc_traffic_optimization/outputs/gpu_report_msa.sqlite does not contain NV Tools Extension (NVTX) data.
-SKIPPED: /oscar/home/sanand14/mc_traffic_optimization/outputs/gpu_report_csa_st.sqlite does not contain NV Tools Extension (NVTX) data.
-SKIPPED: /oscar/home/sanand14/mc_traffic_optimization/outputs/gpu_report_csa.sqlite does not contain NV Tools Extension (NVTX) data.
-slurmstepd: error: Detected 2 oom-kill event(s) in StepId=12327388.batch. Some of your processes may have been killed by the cgroup out-of-memory handler.

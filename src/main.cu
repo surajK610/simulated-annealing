@@ -11,6 +11,7 @@
 #include "schwefel/schwefel_cuda.hpp"
 #include "cuda.h"
 #include "curand.h"
+#include <sys/time.h>
 
 void progress(
     void* instance, double cost, float tgen, float tacc, int opt_id, int iter)
@@ -29,6 +30,9 @@ void progress(
 
 int main(int argc, char** argv)
 {
+    struct timeval start;
+    struct timeval end;
+
     int optionSA = 0;
     int optionCU = 0;
     if (argc > 1)
@@ -50,6 +54,7 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
+    gettimeofday(&start, 0);
     if (optionCU == 0) {
         srand(0);
         double* x = new double[SCHWEFEL::DIM];
@@ -69,7 +74,9 @@ int main(int argc, char** argv)
             
         std::cout << std::endl;
         delete[] x;
-
+        gettimeofday(&end, 0);
+        std::cout << "Took " << (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec) << " microseconds" << std::endl;
+        
         return EXIT_SUCCESS;
     } else if (optionCU == 1) {
         srand(0);
@@ -96,7 +103,9 @@ int main(int argc, char** argv)
         std::cout << std::endl;
 
         delete[] x;
+        gettimeofday(&end, 0);
         
+        std::cout << "Took " << (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec) << " microseconds" << std::endl;
         return EXIT_SUCCESS;
     } else {
         std::cout << "Invalid option for CUDA" << std::endl;
