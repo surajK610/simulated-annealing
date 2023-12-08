@@ -6,7 +6,6 @@
 
 namespace SCHWEFEL {
 
-const double PI  = 3.14159265358979323846264338327;
 const int DIM = 10;
 
 // This defines the Schwefel function. The pointer `instance` can be used to
@@ -29,7 +28,7 @@ void step(void* instance, double* y, const double* x, float tgen)
     int i;
     double tmp;
     for (i = 0; i < DIM; ++i) {
-        tmp = std::fmod(x[i] + tgen * std::tan(PI * (drand48() - 0.5)), 1.);
+        tmp = std::fmod(x[i] + tgen * std::tan(M_PI * (drand48() - 0.5)), 1.);
         y[i] = tmp;
     }
 }

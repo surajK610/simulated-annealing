@@ -29,7 +29,7 @@ public:
 
     /// \param y      The new solution.
     /// \param y_cost The value of the cost function associated with `y`.
-
+    
     inline void step(std::vector<double> &y, double y_cost)
     {
         this->cost = y_cost;
