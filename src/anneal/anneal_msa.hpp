@@ -33,15 +33,12 @@ public:
 
     SolverMultiple() {  };
 
-    // method to write timings and counts to a CSV file
     void writeTimingsToCSV(const std::string& filename) {
         std::ofstream file;
         file.open(filename);
 
-        // Write headers
-        file << "Operation,Total Time (nanoseconds),Count\n";
+        file << "Operation,Total Time (microseconds),Count\n";
 
-        // Write data for each operation
         file << "fx," << total_fx_time << "," << fx_count << "\n";
         file << "step," << total_step_time << "," << step_count << "\n";
         file << "parameter updates," << total_param_time << "," << param_count << "\n";
@@ -62,9 +59,8 @@ public:
                          int iter),
         void* instance)
     {
-        // Timing fx function
-        std::chrono::high_resolution_clock::time_point start_time, end_time;
-
+        struct timeval start;
+        struct timeval end;
         double fx0 = fx(instance, x);
         SharedStates shared_states(this->m, n, x, fx0);
         float tacc = this->tacc_initial;
@@ -87,17 +83,17 @@ public:
             for (int iter = 0; iter < this->max_iters; ++iter) {
 
                 // Timing step function
-                start_time = std::chrono::high_resolution_clock::now();
+                gettimeofday(&start, 0);
                 step(instance, y.data(), shared_states[opt_id].x.data(), tgen);
                 end_time = std::chrono::high_resolution_clock::now();
-                total_step_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+                total_step_time += std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
                 step_count++;
                 
                 // Timing fx function inside loop
                 start_time = std::chrono::high_resolution_clock::now();
                 cost = fx(instance, y.data());
                 end_time = std::chrono::high_resolution_clock::now();
-                total_fx_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+                total_fx_time += std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
                 fx_count++;
 
 
@@ -131,7 +127,7 @@ public:
                     tacc -= this->desired_variance;
                 tgen = this->tgen_schedule * tgen;
                 end_time = std::chrono::high_resolution_clock::now();
-                total_param_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+                total_param_time += std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
                 param_count++;
             }
         }
@@ -152,7 +148,7 @@ public:
         omp_destroy_lock(&lock);
 
         // Call to write timings to CSV at the end of minimize
-        writeTimingsToCSV("timings_msa.csv");
+        writeTimingsToCSV("outputs/timings_msa.csv");
         return 0;
     }
 };  // class SolverCoupled
