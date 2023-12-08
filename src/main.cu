@@ -104,7 +104,6 @@ int main(int argc, char** argv)
 
         delete[] x;
         gettimeofday(&end, 0);
-        
         std::cout << "Took " << (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec) << " microseconds" << std::endl;
         return EXIT_SUCCESS;
     } else {
