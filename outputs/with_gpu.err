@@ -1,0 +1,25 @@
+module: unloading 'cuda/12.2.2'
+module: loading 'cuda/12.2.2'
+module: cuda: To use: module load gcc/10.2
+module: unloading 'gcc/10.2'
+module: loading 'gcc/10.2'
+module: gcc: "Note: loading the gcc module overrides the gcc version on the system.  If you want to revert to the version of gcc provided by the OS, unload the gcc module."
+src/qubo/qubo.cpp: In function ‘void QUBO::monteCarloQUBOSolver(double**, int, int, int*, int)’:
+src/qubo/qubo.cpp:24:10: warning: unused variable ‘localBestConfiguration’ [-Wunused-variable]
+   24 |     int* localBestConfiguration = new int[size];
+      |          ^~~~~~~~~~~~~~~~~~~~~~
+In file included from src/traffic/traffic.cpp:1:
+src/traffic/traffic.h: In member function ‘bool Edge::operator==(const Edge&) const’:
+src/traffic/traffic.h:31:106: warning: suggest parentheses around ‘&&’ within ‘||’ [-Wparentheses]
+   31 |         return ((start == other.start && end == other.end) || (start == other.end && end == other.start) && (distance == other.distance));
+      |                                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/traffic/traffic.cpp: In member function ‘void TrafficGraph::addClosestEdges(std::set<Edge>&)’:
+src/traffic/traffic.cpp:64:21: warning: unused variable ‘addedEdge’ [-Wunused-variable]
+   64 |         const Edge& addedEdge = closestEdges[i];
+      |                     ^~~~~~~~~
+src/anneal/anneal_msa.hpp(49): warning #177-D: variable "k" was declared but never referenced
+              int k, opt_id = omp_get_thread_num();
+                  ^
+
+Remark: The warnings can be suppressed with "-diag-suppress <warning-number>"
+

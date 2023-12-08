@@ -14,8 +14,12 @@ const int DIM = 10;
 double f(void* instance, double* x)
 {
     double sum = 0.;
-    for (int i = 0; i < DIM; ++i)
+    // printf("x: ");
+    for (int i = 0; i < DIM; ++i) {
+        // printf("%f ", 500 * x[i] * std::sin(std::sqrt(std::fabs(500 * x[i]))));
         sum += 500 * x[i] * std::sin(std::sqrt(std::fabs(500 * x[i])));
+    }
+    // printf("\n");
     return 418.9829 * DIM - sum;
 }
 

@@ -68,7 +68,6 @@ int main(int argc, char** argv)
             std::cout << 500 * x[i] << " ";
             
         std::cout << std::endl;
-
         delete[] x;
 
         return EXIT_SUCCESS;
@@ -81,17 +80,13 @@ int main(int argc, char** argv)
         dim3 blockSize(256, 1, 1);
         dim3 numBlocks((SCHWEFEL::DIM + blockSize.x - 1) / blockSize.x, 1, 1);
 
-        curandState *devStates;
-        cudaMalloc((void **)&devStates,  SCHWEFEL::DIM  * sizeof(curandState));
-
-        setup_kernel<<<numBlocks, blockSize>>>(devStates, time(NULL));
+        // setup_kernel<<<numBlocks, blockSize>>>(devStates, time(NULL));
 
         double cost = f_c(nullptr, x);
         printf("Initial cost: %f\n", cost);
 
-        // auto step_partial = StepFunctor(devStates);
-        // solver->minimize( SCHWEFEL::DIM, x,  f_c, step_partial, progress, nullptr);
-        cost = f(nullptr, x);
+        solver->minimize(SCHWEFEL::DIM, x,  f_c, step_c, progress, nullptr);
+        cost = f_c(nullptr, x);
 
         printf("Best cost: %f\nx =\n", cost);
 
