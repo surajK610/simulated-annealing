@@ -14,9 +14,11 @@ make clean
 make
 # ./build/main 0 1
 # ./build/main 0 1
-./build/main 0 1
+# nsys profile --stats=true --force-overwrite=true --output=outputs/gpu_report_csa ./build/main 3 1
+# nsys profile --stats=true --force-overwrite=true --output=outputs/gpu_report_csa ./build/main 3 0
+
 # ./build/main 3 1
-# nsys profile --stats=true --force-overwrite=true --output=outputs/gpu_report0 ./build/main 0 1
-# nsys profile --stats=true --force-overwrite=true --output=outputs/gpu_report1 ./build/main 1 1
-# nsys profile --stats=true --force-overwrite=true --output=outputs/gpu_report2 ./build/main 2 1
-# nsys profile --stats=true --force-overwrite=true --output=outputs/gpu_report3 ./build/main 3 1
+nsys profile --stats=true --force-overwrite=true --output=outputs/gpu_report_msa_st ./build/main 0 1
+nsys profile --stats=true --force-overwrite=true --output=outputs/gpu_report_msa ./build/main 1 1
+nsys profile --stats=true --force-overwrite=true --output=outputs/gpu_report_csa_st ./build/main 2 1
+nsys profile --stats=true --force-overwrite=true --output=outputs/gpu_report_csa ./build/main 3 1

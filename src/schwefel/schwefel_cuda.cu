@@ -15,6 +15,9 @@
 #include <cuda_runtime.h>
 
 const int DIM = 10;
+const int WARP_SIZE = 32;
+const int FULL_MASK = 0xffffffff;
+const bool WARP = false;
 
 __global__ void setup_kernel(curandState *state, unsigned long seed) {
     size_t idx = threadIdx.x + blockIdx.x * blockDim.x;  
@@ -29,22 +32,35 @@ __global__ void f_kernel(double* x, double* result) {
     }
 }
 
-
 __global__ void f_kernel_warp(double* x, double* result) {
-    size_t idx = threadIdx.x + blockIdx.x * blockDim.x;
-    size_t warp_id = threadIdx.x / 32;
-    size_t lane = threadIdx.x % 32;
-    if (idx < DIM) {
-      result[idx] = 500 * x[idx] * sin(sqrt(fabs(500 * x[idx])));
+  // max 1 block
+    size_t lane = threadIdx.x % WARP_SIZE;
+    int warpid = threadIdx.x/WARP_SIZE;
+    int nwarps = blockDim.x/WARP_SIZE;
 
-      syncwarp();
-      for (int i = 16; i >= 1; i /= 2) {
-        double temp = __shfl_down_sync(0xFFFFFFFF, result[idx], i);
-        if (lane < i) {
-          result[idx] += temp;
+    double sum = 0.0;
+    if (lane < DIM) {
+      for (size_t idx = lane + WARP_SIZE*warpid; idx < DIM; idx += WARP_SIZE*nwarps) { // modulus addition
+        if (idx < DIM) {
+          sum += 500 * x[idx] * sin(sqrt(fabs(500 * x[idx])));
         }
       }
+      __syncwarp();
+      for (size_t offset = WARP_SIZE/2; offset > 0; offset /= 2) {
+        sum += __shfl_down_sync(FULL_MASK, sum, offset);
+      }
 
+      __shared__ double s_mem[1024/WARP_SIZE];
+      if (lane == 0) {
+        s_mem[warpid] = sum;
+      }
+
+      __syncthreads(); // sync threads within block
+      if (threadIdx.x == 0) { // first lane in first warp
+        for (int j = 0; j < nwarps; ++j) {
+          result[0] += s_mem[j];
+        }   
+      }
     }
 }
 
@@ -69,18 +85,28 @@ double f_c(void* instance, double* x) {
 
   dim3 blockSize(256, 1, 1);
   dim3 numBlocks((DIM + blockSize.x - 1) / blockSize.x, 1, 1);
-  f_kernel<<<numBlocks, blockSize>>>(d_x, d_result);
-  cudaSynchronize();
-  // fflush(stdout);
-  cudaMemcpy(h_result, d_result, DIM * sizeof(double), cudaMemcpyDeviceToHost);
+  double sum = 0.0;
 
-  double sum = 0.;
-  // printf("f_c: ");
-  for (int i = 0; i < DIM; ++i) {
-    // printf("%f ", h_result[i]);
-    sum += h_result[i];
+  if (WARP) {
+    if (DIM > 1024) {
+      printf("Warp kernel only supports DIM <= 1024\n");
+      exit(1);
+    }
+    
+    f_kernel_warp<<<1, 1024>>>(d_x, d_result); // only 1 block, max 1024 threads
+    cudaMemcpy(h_result, d_result, 1 * sizeof(double), cudaMemcpyDeviceToHost);
+    sum = h_result[0];
+  } else {
+    f_kernel<<<numBlocks, blockSize>>>(d_x, d_result);
+    cudaMemcpy(h_result, d_result, DIM * sizeof(double), cudaMemcpyDeviceToHost);
+    for (int i = 0; i < DIM; ++i) {
+      sum += h_result[i];
+    }
   }
-  // printf("\n");
+  cudaDeviceSynchronize();
+  // fflush(stdout);
+
+  
   delete[] h_result;
   cudaFree(d_x);
   cudaFree(d_result);
@@ -108,7 +134,7 @@ void step_c(void* instance, double* y, const double* x, float tgen) {
     printf("Setup done\n");
   }
   step_kernel<<<numBlocks, blockSize>>>(d_y, d_x, tgen, dev_states);
-  cudaSynchronize();
+  cudaDeviceSynchronize();
   cudaMemcpy(y, d_y, DIM * sizeof(double), cudaMemcpyDeviceToHost);
 
   cudaFree(d_x);
