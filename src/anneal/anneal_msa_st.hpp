@@ -6,6 +6,7 @@
 #include <vector>
 #include "context.hpp"
 #include <sys/time.h>
+#include <fstream>
 
 namespace MSA_ST {
 

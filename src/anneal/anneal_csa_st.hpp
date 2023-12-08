@@ -6,6 +6,7 @@
 #include <vector>
 #include "context.hpp"
 #include <sys/time.h>
+#include <fstream>
 
 namespace CSA_ST {
 
@@ -29,7 +30,7 @@ public:
     int param_count = 0;
 
 
-    SolverMultipleST() {  };
+    SolverCoupledST() {  };
     
     void writeTimingsToCSV(const std::string& filename) {
         std::ofstream file;
@@ -58,7 +59,8 @@ public:
         void* instance)
     {
         double fx0 = fx(instance, x);
-
+        struct timeval start;
+        struct timeval end;
         // Initialize shared values.
         SharedStates shared_states(this->m, n, x, fx0);
         float tacc = this->tacc_initial;

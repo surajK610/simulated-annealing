@@ -12,7 +12,7 @@
 module load cuda/12.2.2 gcc/10.2 googletest
 make clean
 make
-./build/main 1 1
+./build/main 3 1
 # ./build/main 0 1
 # nsys profile --stats=true --force-overwrite=true --output=outputs/gpu_report_csa ./build/main 3 1
 # nsys profile --stats=true --force-overwrite=true --output=outputs/gpu_report_csa ./build/main 3 0

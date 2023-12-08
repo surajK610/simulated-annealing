@@ -1,0 +1,4 @@
+Operation,Total Time (microseconds),Count
+fx,1424965,4000000
+step,2191328,4000000
+parameter updates,43242,1000000
