@@ -19,7 +19,7 @@ src/traffic/traffic.cpp: In member function ‘void TrafficGraph::addClosestEdge
 src/traffic/traffic.cpp:64:21: warning: unused variable ‘addedEdge’ [-Wunused-variable]
    64 |         const Edge& addedEdge = closestEdges[i];
       |                     ^~~~~~~~~
-src/anneal/anneal_msa.hpp(79): warning #177-D: variable "k" was declared but never referenced
+src/anneal/anneal_msa.hpp(74): warning #177-D: variable "k" was declared but never referenced
               int k, opt_id = omp_get_thread_num();
                   ^
 
