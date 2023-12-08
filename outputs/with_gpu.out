@@ -17,7 +17,7 @@ nvcc -O3 -c src/main.cu -o build/src/main.o
 mkdir -p build/src/schwefel/
 nvcc -O3 -c src/schwefel/schwefel_cuda.cu -o build/src/schwefel/schwefel_cuda.o
 g++ build/src/qubo/qubo.o build/src/traffic/traffic.o build/src/main.o build/src/schwefel/schwefel_cuda.o  -Wall -O3 -fopenmp -I src -I src/anneal -I src/schwefel -L -lgtest -lgtest_main -pthread -lcudart -L /usr/local/cuda/lib64 -o build/main
-Initial cost: 3989.695190
+Initial cost: 4189.829000
 Setup done
 bestcost=3.853e+03 	 tgen=1.000e-02 	 tacc=9.000e-01 	 thread=0
 bestcost=3.530e+03 	 tgen=1.000e-02 	 tacc=9.181e-01 	 thread=0
