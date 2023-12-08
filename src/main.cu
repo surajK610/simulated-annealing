@@ -25,9 +25,6 @@ void progress(
     return ;
 }
 
-
-
-
 int main(int argc, char** argv)
 {
     struct timeval start;

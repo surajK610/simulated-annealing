@@ -14,7 +14,7 @@
 #include <curand_kernel.h>
 #include <cuda_runtime.h>
 
-const int DIM = 10;
+const int DIM = 100;
 const int WARP_SIZE = 32;
 const int FULL_MASK = 0xffffffff;
 const bool WARP = false;

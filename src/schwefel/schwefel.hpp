@@ -6,7 +6,7 @@
 
 namespace SCHWEFEL {
 
-const int DIM = 10;
+const int DIM = 100;
 
 // This defines the Schwefel function. The pointer `instance` can be used to
 // pass data to `f`, such as the dimension.

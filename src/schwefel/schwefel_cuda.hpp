@@ -9,7 +9,7 @@ struct curandState;
 #include <curand_kernel.h>
 #endif
 
-const int DIM = 10;
+const int DIM = 100;
 
 // Declaration of CUDA kernels
 __global__ void setup_kernel(curandState *state, unsigned long seed);
