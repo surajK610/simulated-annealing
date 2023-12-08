@@ -10,6 +10,8 @@
 
 # Load modules
 module load cuda/12.2.2 gcc/10.2
+module load cmake
+module load googletest
 make clean
 make
 # ./build/main 0 1

@@ -4,7 +4,10 @@
 #include <cmath>
 #include <omp.h>
 #include <vector>
+#include <chrono>
+#include <iostream>
 #include "context.hpp"
+#include <fstream>
 
 namespace MSA {
 
@@ -19,7 +22,32 @@ public:
     float tacc_schedule = 0.01;
     float desired_variance = 0.99;
 
+    // Timing variables for each operation
+    double total_fx_time = 0.0;
+    int fx_count = 0;
+    double total_step_time = 0.0;
+    int step_count = 0;
+    double total_param_time = 0.0;
+    int param_count = 0;
+
+
     SolverMultiple() {  };
+
+    // method to write timings and counts to a CSV file
+    void writeTimingsToCSV(const std::string& filename) {
+        std::ofstream file;
+        file.open(filename);
+
+        // Write headers
+        file << "Operation,Total Time (nanoseconds),Count\n";
+
+        // Write data for each operation
+        file << "fx," << total_fx_time << "," << fx_count << "\n";
+        file << "step," << total_step_time << "," << step_count << "\n";
+        file << "parameter updates," << total_param_time << "," << param_count << "\n";
+
+        file.close();
+    }
 
     inline int minimize(
         int n, // number of dimensions
@@ -34,8 +62,10 @@ public:
                          int iter),
         void* instance)
     {
-        double fx0 = fx(instance, x);
+        // Timing fx function
+        std::chrono::high_resolution_clock::time_point start_time, end_time;
 
+        double fx0 = fx(instance, x);
         SharedStates shared_states(this->m, n, x, fx0);
         float tacc = this->tacc_initial;
         float tgen = this->tgen_initial;
@@ -56,9 +86,22 @@ public:
             #pragma omp for
             for (int iter = 0; iter < this->max_iters; ++iter) {
 
+                // Timing step function
+                start_time = std::chrono::high_resolution_clock::now();
                 step(instance, y.data(), shared_states[opt_id].x.data(), tgen);
+                end_time = std::chrono::high_resolution_clock::now();
+                total_step_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+                step_count++;
+                
+                // Timing fx function inside loop
+                start_time = std::chrono::high_resolution_clock::now();
                 cost = fx(instance, y.data());
+                end_time = std::chrono::high_resolution_clock::now();
+                total_fx_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+                fx_count++;
 
+
+                start_time = std::chrono::high_resolution_clock::now();
                 if (cost < shared_states[opt_id].cost) {
                     omp_set_lock(&lock);
 
@@ -71,6 +114,7 @@ public:
 
                     shared_states[opt_id].step(y, cost);
                     omp_unset_lock(&lock);
+
                 } else {
 
                     unif = drand48();
@@ -86,6 +130,9 @@ public:
                 if (tacc > this->desired_variance)
                     tacc -= this->desired_variance;
                 tgen = this->tgen_schedule * tgen;
+                end_time = std::chrono::high_resolution_clock::now();
+                total_param_time += std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+                param_count++;
             }
         }
 
@@ -104,6 +151,8 @@ public:
         // Clean up.
         omp_destroy_lock(&lock);
 
+        // Call to write timings to CSV at the end of minimize
+        writeTimingsToCSV("timings_msa.csv");
         return 0;
     }
 };  // class SolverCoupled
