@@ -5,6 +5,7 @@
 #include <omp.h>
 #include <vector>
 #include "context.hpp"
+#include <sys/time.h>
 
 namespace CSA {
 
@@ -19,7 +20,30 @@ public:
     float tacc_schedule = 0.01;
     float desired_variance = 0.99;
 
-    SolverCoupled() {  };
+    // Timing variables for each operation
+    long total_fx_time = 0.0;
+    int fx_count = 0;
+    long total_step_time = 0.0;
+    int step_count = 0;
+    long total_param_time = 0.0;
+    int param_count = 0;
+
+
+    SolverMultipleST() {  };
+    
+    void writeTimingsToCSV(const std::string& filename) {
+        std::ofstream file;
+        file.open(filename);
+
+        file << "Operation,Total Time (microseconds),Count\n";
+
+        file << "fx," << total_fx_time << "," << fx_count << "\n";
+        file << "step," << total_step_time << "," << step_count << "\n";
+        file << "parameter updates," << total_param_time << "," << param_count << "\n";
+
+        file.close();
+    }
+
 
     inline int minimize(
         int n, // number of dimensions
@@ -57,9 +81,19 @@ public:
             #pragma omp for
             for (int iter = 0; iter < this->max_iters; ++iter) {
 
+                gettimeofday(&start, 0);
                 step(instance, y.data(), shared_states[opt_id].x.data(), tgen);
-                cost = fx(instance, y.data());
+                gettimeofday(&end, 0);
+                total_step_time += (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
+                step_count++;
 
+                gettimeofday(&start, 0);
+                cost = fx(instance, y.data());
+                gettimeofday(&end, 0);
+                total_fx_time += (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
+                fx_count++;
+
+                gettimeofday(&start, 0);
                 if (cost < shared_states[opt_id].cost) {
                     omp_set_lock(&lock);
 
@@ -105,6 +139,9 @@ public:
                     tgen = this->tgen_schedule * tgen;
 
                     omp_unset_lock(&lock);
+                    gettimeofday(&end, 0);
+                    total_param_time += (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
+                    param_count++;
                 }
             }
         }
@@ -123,6 +160,7 @@ public:
 
         // Clean up.
         omp_destroy_lock(&lock);
+        writeTimingsToCSV("outputs/timings_csa.csv");
 
         return 0;
     }

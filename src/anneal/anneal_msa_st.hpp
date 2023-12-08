@@ -134,4 +134,3 @@ public:
 };  // class SolverMultipleST
 }  // namespace MSA_ST
 #endif
-

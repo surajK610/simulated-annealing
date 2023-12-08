@@ -4,10 +4,8 @@
 #include <cmath>
 #include <omp.h>
 #include <vector>
-#include <chrono>
-#include <iostream>
 #include "context.hpp"
-#include <fstream>
+#include <sys/time.h>
 
 namespace MSA {
 
@@ -85,19 +83,20 @@ public:
                 // Timing step function
                 gettimeofday(&start, 0);
                 step(instance, y.data(), shared_states[opt_id].x.data(), tgen);
-                end_time = std::chrono::high_resolution_clock::now();
-                total_step_time += std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+                gettimeofday(&end, 0);
+                total_step_time += (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
                 step_count++;
+
                 
                 // Timing fx function inside loop
-                start_time = std::chrono::high_resolution_clock::now();
+                gettimeofday(&start, 0);
                 cost = fx(instance, y.data());
-                end_time = std::chrono::high_resolution_clock::now();
-                total_fx_time += std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+                gettimeofday(&end, 0);
+                total_fx_time += (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
                 fx_count++;
 
 
-                start_time = std::chrono::high_resolution_clock::now();
+                gettimeofday(&start, 0);
                 if (cost < shared_states[opt_id].cost) {
                     omp_set_lock(&lock);
 
@@ -126,8 +125,8 @@ public:
                 if (tacc > this->desired_variance)
                     tacc -= this->desired_variance;
                 tgen = this->tgen_schedule * tgen;
-                end_time = std::chrono::high_resolution_clock::now();
-                total_param_time += std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
+                gettimeofday(&end, 0);
+                total_param_time += (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
                 param_count++;
             }
         }
