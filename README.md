@@ -1,4 +1,4 @@
-# Monte Carlo Sampling For Traffic Flow Optimization (Simulated Quantum Annealing)
+# Simulated Annealing Experiments
 
 ## Time (Microseconds)
 |               | MSA Single Thread | MSA       | CSA Single Thread | CSA      |
